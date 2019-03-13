@@ -1,39 +1,67 @@
 from django.db import models
-from datetime import datetime
+from django.core.validators import MaxValueValidator, MinValueValidator
+
+title_size = 50
+summary_size = 400
 
 
 # Create your models here.
-class TutorialCategory(models.Model):
-    tutorial_category = models.CharField(max_length=200)
-    category_summary = models.CharField(max_length=200)
-    category_slug = models.CharField(max_length=200)
+class Course(models.Model):
+    title = models.CharField(max_length=title_size)
+    summary = models.TextField(max_length=summary_size, null=True)
 
     class Meta:
-        verbose_name_plural = 'Categories'
+        verbose_name_plural = 'Courses'
 
     def __str__(self):
-        return self.tutorial_category
+        return self.title
 
 
-class TutorialSeries(models.Model):
-    tutorial_series = models.CharField(max_length=200)
-    tutorial_category = models.ForeignKey(TutorialCategory, default=1, verbose_name='Category', on_delete=models.SET_DEFAULT)
-    series_summary = models.CharField(max_length=200)
+class Task(models.Model):
+    title = models.CharField(max_length=title_size)
+    summary = models.TextField(max_length=summary_size, null=True)
+    rating = models.SmallIntegerField(validators=[MaxValueValidator(5), MinValueValidator(0)], default=0)
 
     class Meta:
-        verbose_name_plural = 'Series'
+        verbose_name_plural = 'Tasks'
 
     def __str__(self):
-        return self.tutorial_series
+        return self.title
 
 
-class Tutorial(models.Model):
-    tutorial_title = models.CharField(max_length=200)
-    tutorial_content = models.TextField()
-    tutorial_published = models.DateTimeField('date published', default=datetime.now())
+class Test(models.Model):
+    title = models.CharField(max_length=title_size)
+    input = models.TextField()
+    output = models.TextField()
 
-    tutorial_series = models.ForeignKey(TutorialSeries, default=1, verbose_name='Series', on_delete=models.SET_DEFAULT)
-    tutorial_slug = models.CharField(max_length=200, default=1)
+    class Meta:
+        verbose_name_plural = 'Tests'
 
     def __str__(self):
-        return self.tutorial_title
+        return self.title
+
+
+class Comment(models.Model):
+    #id = models.AutoField(primary_key=True)
+    summary = models.TextField(max_length=summary_size)
+    #user_id = models.ForeignKey(User, verbose_name='User', on_delete=models.SET_DEFAULT)
+
+    class Meta:
+        verbose_name_plural = 'Comments'
+
+    #def __str__(self):
+    #   return self.id
+
+
+# Связующие таблицы
+class CourseTask(models.Model):
+    task_id = models.ForeignKey(Task, verbose_name='Task')
+    course_id = models.ForeignKey(Course, verbose_name='Course')
+
+    class Meta:
+        verbose_name_plural = 'CourseTasks'
+
+    def __str__(self):
+        return self.task_id + ' ' +  self.course_id
+
+

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Tutorial, TutorialSeries, TutorialCategory
+from .models import Course, Task, Test, Comment
 from tinymce.widgets import TinyMCE
 from django.db import models
 
@@ -21,7 +21,10 @@ class TutorialAdmin(admin.ModelAdmin):
         models.TextField: {'widget': TinyMCE()}
     }
 
-admin.site.register(TutorialSeries)
-admin.site.register(TutorialCategory)
 
-admin.site.register(Tutorial, TutorialAdmin)
+admin.site.register(Course)
+admin.site.register(Task)
+admin.site.register(Test)
+admin.site.register(Comment)
+
+#admin.site.register(Tutorial, TutorialAdmin)
