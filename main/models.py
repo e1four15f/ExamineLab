@@ -1,14 +1,15 @@
 from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
 
+
 title_size = 50
 summary_size = 400
 
 
-# Create your models here.
 class Course(models.Model):
+    """Таблица с курсами"""
     title = models.CharField(max_length=title_size)
-    summary = models.TextField(max_length=summary_size, null=True)
+    summary = models.TextField(max_length=summary_size, null=True, blank=True)
 
     class Meta:
         verbose_name_plural = 'Courses'
@@ -18,9 +19,12 @@ class Course(models.Model):
 
 
 class Task(models.Model):
+    """Таблица с заданиями"""
     title = models.CharField(max_length=title_size)
-    summary = models.TextField(max_length=summary_size, null=True)
+    summary = models.TextField(max_length=summary_size, null=True, blank=True)
     rating = models.SmallIntegerField(validators=[MaxValueValidator(5), MinValueValidator(0)], default=0)
+
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, default=0)
 
     class Meta:
         verbose_name_plural = 'Tasks'
@@ -30,9 +34,12 @@ class Task(models.Model):
 
 
 class Test(models.Model):
+    """Таблица с тестами"""
     title = models.CharField(max_length=title_size)
     input = models.TextField()
     output = models.TextField()
+
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, default=0)
 
     class Meta:
         verbose_name_plural = 'Tests'
@@ -42,26 +49,16 @@ class Test(models.Model):
 
 
 class Comment(models.Model):
-    #id = models.AutoField(primary_key=True)
+    """Таблица с комментариями
+    TODO сделать динамическое заполнение таблицы через взаимодействие с пользователем"""
     summary = models.TextField(max_length=summary_size)
-    #user_id = models.ForeignKey(User, verbose_name='User', on_delete=models.SET_DEFAULT)
 
     class Meta:
         verbose_name_plural = 'Comments'
 
-    #def __str__(self):
-    #   return self.id
 
 
-# Связующие таблицы
-class CourseTask(models.Model):
-    task_id = models.ForeignKey(Task, verbose_name='Task')
-    course_id = models.ForeignKey(Course, verbose_name='Course')
 
-    class Meta:
-        verbose_name_plural = 'CourseTasks'
 
-    def __str__(self):
-        return self.task_id + ' ' +  self.course_id
 
 

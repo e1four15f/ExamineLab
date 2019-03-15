@@ -1,16 +1,33 @@
 from django.shortcuts import render, redirect
-#from .models import Tutorial
+from django.http import HttpResponse
+from .models import Course, Task
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
 from .forms import NewUserForm
 
 
-# Create your views here.
+def single_slug(request, single_slug):
+    try:
+        course = Course.objects.get(pk=int(single_slug))
+        tasks = Task.objects.filter(course__id=course.id).order_by('title')
+        return render(request=request,
+                      template_name='main/course.html',
+                      context={'course': course,
+                               'tasks': tasks})
+    except Course.DoesNotExist:
+        return HttpResponse('404 {} not found!'.format(single_slug))
+
+
 def homepage(request):
     return render(request=request,
-                  template_name='main/home.html',)
-                #  context={'tutorials': Tutorial.objects.all})
+                  template_name='main/home.html')
+
+
+def courses(request):
+    return render(request=request,
+                  template_name='main/courses.html',
+                  context={'courses': Course.objects.all})
 
 
 def register(request):

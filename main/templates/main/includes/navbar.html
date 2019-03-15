@@ -1,6 +1,10 @@
 <nav>
     <div class="nav-wrapper">
-        <a href="/" class="brand-logo">MyTest B-)</a>
+        {% if user.is_authenticated  %}
+            <a href="/courses" class="brand-logo center">ExamineLab</a>
+        {% else %}
+            <a href="/" class="brand-logo center">ExamineLab</a>
+        {% endif %}
         <a href="#" data-target="mobile-demo" class="sidenav-trigger">
             <i class="material-icons" style="font-size: 30px">menu</i>
         </a>
@@ -35,6 +39,6 @@ $(document).ready(function(){
         closeOnClick: false,    // Closes side-nav on <a> clicks, useful for Angular/Meteor
         draggable: true         // Choose whether you can drag to open on touch screens
     });
-$('.sidenav').sidenav('show');
+    $('.sidenav').sidenav('show');
 });
 </script>

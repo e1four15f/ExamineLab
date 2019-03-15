@@ -2,19 +2,20 @@
 
 {% block content %}
     <div class="row">
-        {% for t in tutorials %}
-        <div class="col s12 m6">
-            <div class="card blue-grey darken-1">
-                <div class="card-content white-text">
-                    <span class="card-title">{{t.tutorial_title}}</span>
-                    <p style="font-size:70%">{{t.tutorial_published}}</p>
-                    <p>{{t.tutorial_content|safe}}</p>
+        <div class="col s12">
+            <div class="card">
+                <div class="card-image">
+                    <img src="https://getcourse.com.au/wp-content/uploads/2017/10/study-online-at-home-1.jpg">
                 </div>
                 <div class="card-action">
-                    <a href="#">Visit</a>
+                    <a href="courses" class="waves-effect waves-light btn">Начать учиться!</a>
                 </div>
+                <div class="card-content">
+                    <p>I am a very simple card. I am good at containing small bits of information.
+                    I am convenient because I require little markup to use effectively.</p>
+                </div>
+
             </div>
         </div>
-        {% endfor %}
     </div>
 {% endblock %}
