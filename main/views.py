@@ -19,6 +19,17 @@ def single_slug(request, single_slug):
         return HttpResponse('404 {} not found!'.format(single_slug))
 
 
+def task_single_slug(request, single_slug, task_single_slug):
+    try:
+        task = Task.objects.get(pk=int(task_single_slug))
+        return render(request=request,
+                      template_name='main/task.html',
+                      context={'task': task})
+
+    except Course.DoesNotExist:
+        return HttpResponse('404 {} not found!'.format(task_single_slug))
+
+
 def homepage(request):
     return render(request=request,
                   template_name='main/home.html')

@@ -10,18 +10,20 @@
                   <div class="collapsible-header"><i class="material-icons">filter_drama</i>{{ t.title }}</div>
                   <div class="collapsible-body">
                       <span>{{ t.summary }}</span>
-                      <span>{{ t.ranting }}</span>
+                      <span>{{ t.rating }}</span>
+                      <a href="{{ course.id }}/{{ t.id }}" class="waves-effect waves-light btn">Начать!</a>
                   </div>
                 </li>
             {% endfor %}
         </ul>
-    </div>
+
+	</div>
+	<script>
+        $(document).ready(function(){
+            //alert(1);
+            $(".collapsible").collapsible({accordion: true});
+            $(".collapsible").collapsible({accordion: false});
+        });
+    </script>
 {% endblock %}
 
-<script>
-$(document).ready(function(){
-    alert(1);
-    $(".collapsible").collapsible({accordion: true});
-    $(".collapsible").collapsible({accordion: false});
-});
-</script>

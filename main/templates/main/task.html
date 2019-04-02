@@ -1,0 +1,43 @@
+{% extends 'main/header.html' %}
+
+{% block content %}
+    <div class="row">
+
+        <h1>{{ task.title }}</h1>
+        <p>{{ task.summary }}</p>
+
+        <div class="col s8">
+            <form action="#">
+                <div class="file-field input-field">
+                    <div class="btn">
+                        <span>File</span>
+                        <input type="file">
+                    </div>
+                    <div class="file-path-wrapper"><input class="file-path validate" type="text">
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="input-field col s4">
+            <select>
+                <!-- TODO получать список языков из бд-->
+                <option value="1">Python</option>
+                <option value="2">C++</option>
+                <option value="3">Java</option>
+            </select>
+            <label>Language</label>
+        </div>
+
+        <form name="test" method="post">
+            <textarea name="comment" cols="40" rows="150" style="resize: none; height: 60%;"></textarea>
+            <p><a href="#" class="waves-effect waves-light btn">Отправить</a></p>
+        </form>
+	</div>
+    <script>
+        $(document).ready(function(){
+            $('select').formSelect();
+        });
+    </script>
+{% endblock %}
+
