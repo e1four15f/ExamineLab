@@ -1,10 +1,12 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
-from .models import Course, Task
+from .models import Course, Task, Test
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
 from .forms import NewUserForm, SubmitForm
+
+from modules.tester import Tester
 
 
 def single_slug(request, single_slug):
@@ -15,6 +17,7 @@ def single_slug(request, single_slug):
                       template_name='main/course.html',
                       context={'course': course,
                                'tasks': tasks})
+
     except Course.DoesNotExist:
         return HttpResponse('404 Course {} not found!'.format(single_slug))
 
@@ -25,9 +28,11 @@ def task_single_slug(request, single_slug, task_single_slug):
 
         if request.method == 'POST':
             form = SubmitForm(request.POST)
+
             if form.is_valid():
-                user_code = form.data['submit_solution']
-                return HttpResponse(user_code)
+                tests = Test.objects.filter(task__id=task.id).order_by('title')
+                Tester('/temp/task/', form.data['submit_solution'], tests).run()
+                #return HttpResponse(task)
         else:
             form = SubmitForm()
 
