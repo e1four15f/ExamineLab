@@ -4,7 +4,7 @@ from .models import Course, Task
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
-from .forms import NewUserForm
+from .forms import NewUserForm, SubmitForm
 
 
 def single_slug(request, single_slug):
@@ -16,18 +16,28 @@ def single_slug(request, single_slug):
                       context={'course': course,
                                'tasks': tasks})
     except Course.DoesNotExist:
-        return HttpResponse('404 {} not found!'.format(single_slug))
+        return HttpResponse('404 Course {} not found!'.format(single_slug))
 
 
 def task_single_slug(request, single_slug, task_single_slug):
     try:
         task = Task.objects.get(pk=int(task_single_slug))
+
+        if request.method == 'POST':
+            form = SubmitForm(request.POST)
+            if form.is_valid():
+                user_code = form.data['submit_solution']
+                return HttpResponse(user_code)
+        else:
+            form = SubmitForm()
+
         return render(request=request,
                       template_name='main/task.html',
-                      context={'task': task})
+                      context={'task': task,
+                               'form': form})
 
-    except Course.DoesNotExist:
-        return HttpResponse('404 {} not found!'.format(task_single_slug))
+    except Task.DoesNotExist:
+        return HttpResponse('404 Task {} not found!'.format(task_single_slug))
 
 
 def homepage(request):

@@ -3,14 +3,14 @@
 {% block content %}
     <div class="row">
 
-        <h1>{{ task.title }}</h1>
+        <h3>{{ task.title }}</h3>
         <p>{{ task.summary }}</p>
 
         <div class="col s8">
             <form action="#">
                 <div class="file-field input-field">
                     <div class="btn">
-                        <span>File</span>
+                        <span>Загрузить файл</span>
                         <input type="file">
                     </div>
                     <div class="file-path-wrapper"><input class="file-path validate" type="text">
@@ -26,18 +26,26 @@
                 <option value="2">C++</option>
                 <option value="3">Java</option>
             </select>
-            <label>Language</label>
+            <label>Язык</label>
         </div>
 
-        <form name="test" method="post">
-            <textarea name="comment" cols="40" rows="150" style="resize: none; height: 60%;"></textarea>
-            <p><a href="#" class="waves-effect waves-light btn">Отправить</a></p>
+        <form method="post" tabindex="-1">
+            {% csrf_token %}
+            {{ form }}
+            <p><input type="submit" value="Submit"></p>
         </form>
 	</div>
+
     <script>
         $(document).ready(function(){
             $('select').formSelect();
         });
+
+        $(document).keydown(function(objEvent) {
+            if (objEvent.keyCode == 9) {  //tab pressed
+               objEvent.preventDefault(); // stops its action
+            }
+        })
     </script>
 {% endblock %}
 

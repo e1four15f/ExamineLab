@@ -16,3 +16,12 @@ class NewUserForm(UserCreationForm):
         if commit:
             user.save()
         return user
+
+
+class SubmitForm(forms.Form):
+    widget = forms.Textarea(attrs={'style': 'resize:none; height:50%'})
+    submit_solution = forms.CharField(label='Ваш код здесь', widget=widget)
+
+    class Meta:
+        fields = ('code')
+
