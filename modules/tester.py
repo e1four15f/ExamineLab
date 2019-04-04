@@ -40,8 +40,8 @@ class Tester:
             dir = self.dir[1:]
             stdin = dir + 'in/' + str(i)
             stdout = dir + 'out/' + str(i)
-
-            os.system('python ' + dir + self.filename + ' < ' + stdin + ' > ' + stdout)
+            
+            os.system('python3 ' + dir + self.filename + ' < ' + stdin + ' > ' + stdout)
             
             with open(os.getcwd() + '/' + stdout, 'r') as file:
                 self.out_content.append(file.read())
