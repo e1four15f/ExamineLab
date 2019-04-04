@@ -5,11 +5,16 @@ class Tester:
     def __init__(self, dir, code, tests, filename='code.'):
         self.dir = dir
         self.code = code
-        self.in_content = [t.input for t in tests]
-        self.ans_content = [t.output for t in tests]
+        self.tests = tests
+        self.in_content = [re.sub(r'\r', '', t.input) for t in tests]
+        self.ans_content = [re.sub(r'\r', '', t.output) for t in tests]
+        self.out_content = []
         self.filename = filename
 
     def _compare_files(self, files_content1, files_content2):
+        files_content1 = re.sub(r'\n', '', files_content1)
+        files_content2 = re.sub(r'\n', '', files_content2)
+        
         if len(files_content1) != len(files_content2):
             return False
 
@@ -37,6 +42,9 @@ class Tester:
             stdout = dir + 'out/' + str(i)
 
             os.system('python ' + dir + self.filename + ' < ' + stdin + ' > ' + stdout)
+            
+            with open(os.getcwd() + '/' + stdout, 'r') as file:
+                self.out_content.append(file.read())
 
     def _create_files(self):
         path = os.getcwd() + self.dir + '/'
@@ -52,14 +60,29 @@ class Tester:
 
         for i in range(len(self.in_content)):
             with open(path + 'in/' + str(i), 'w', newline=os.linesep) as file:
-                file.write(re.sub(r'\r', '', self.in_content[i]))
+                file.write(self.in_content[i])
             with open(path + 'ans/' + str(i), 'w', newline=os.linesep) as file:
-                file.write(re.sub(r'\r', '', self.ans_content[i]))
+                file.write(self.ans_content[i])
+
+    def _delete_files(self):
+        #TODO Удалить временные файлы 
+        pass
 
     def run(self):
         self._create_files()
         self._run_user_code()
 
-        #generator = self._apply_tests()
-        #for i, x in enumerate(generator):
-        #    print('Test {} {}!'.format(i, 'passed' if x else 'failed'))
+        passed = {}
+        generator = self._apply_tests()
+        for i, x in enumerate(generator):
+            if x:
+                print('Test {} passed!'.format(self.tests[i].title))
+                passed[self.tests[i].title] = True
+            else:
+                print('Test {} failed!'.format(self.tests[i].title))
+                passed[self.tests[i].title] = False
+
+        self._delete_files()
+        
+        return passed
+

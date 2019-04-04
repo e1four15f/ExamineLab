@@ -25,21 +25,27 @@ def single_slug(request, single_slug):
 def task_single_slug(request, single_slug, task_single_slug):
     try:
         task = Task.objects.get(pk=int(task_single_slug))
+        tests = Test.objects.filter(task__id=task.id).order_by('title')
 
         if request.method == 'POST':
             form = SubmitForm(request.POST)
 
             if form.is_valid():
-                tests = Test.objects.filter(task__id=task.id).order_by('title')
-                Tester('/temp/task/', form.data['submit_solution'], tests).run()
-                #return HttpResponse(task)
+                passed = Tester('/temp/task/', form.data['submit_solution'], tests).run()
+                return render(request=request,
+                      template_name='main/task.html',
+                      context={'task': task,
+                               'form': form,
+                               'tests': tests,
+                               'passed': passed})
         else:
             form = SubmitForm()
 
         return render(request=request,
                       template_name='main/task.html',
                       context={'task': task,
-                               'form': form})
+                               'form': form,
+                               'tests': tests})
 
     except Task.DoesNotExist:
         return HttpResponse('404 Task {} not found!'.format(task_single_slug))

@@ -34,8 +34,32 @@
             {{ form }}
             <p><input type="submit" value="Submit"></p>
         </form>
-	</div>
+        
+        <div class="input-field col s6">
+            <h4>Решение задачи</h4>
+            <span style="white-space: pre-line">{{ task.solution }}</span>
+        </div>
 
+
+        <div class="input-field col s6">
+            <h4>Тесты</h4>
+            {% for test in tests %}
+                <span>{{ test.title }}</span>
+                {% if not passed %}
+                    <i class="tiny material-icons yellow">cached</i>
+                {% else %}
+                    {% if passed|get_item:test.title %}
+                        <i class="tiny material-icons green">check</i>
+                    {% else %}
+                        <i class="tiny material-icons red">close</i>
+                    {% endif %}
+                {% endif %}
+                </br>
+            {% endfor %}
+        </div>
+    </div>
+
+    
     <script>
         $(document).ready(function(){
             $('select').formSelect();

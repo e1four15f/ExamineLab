@@ -26,6 +26,8 @@ class Task(models.Model):
 
     course = models.ForeignKey(Course, on_delete=models.CASCADE, default=0)
 
+    solution = models.TextField(null=True, blank=True)
+
     class Meta:
         verbose_name_plural = 'Tasks'
 
