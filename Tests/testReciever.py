@@ -91,5 +91,5 @@ class TestReciever:
                                           args)
                                           for prInput in inputs]
 
-        return list(verification.verifyMultiple(programOuts, tests))
+        return verification.verifyMultiple(programOuts, tests)
 
