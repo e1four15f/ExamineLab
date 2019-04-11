@@ -8,10 +8,11 @@ def verifyMultiple(recvOut_lst, test_lst):
     if len(recvOut_lst) != len(test_lst):
         raise Exception('User out and tests lengths are different [user {UO}, test {tst}]'
                         .format(UO = len(recvOut_lst), tst = len(test_lst)))
+    print("{20}".format(recvOut_lst[i]))
     for i in range(len(recvOut_lst)):
         if verifyOut(recvOut_lst[i], test_lst[i]):
-            yield True
+            yield (i, True)
         else:
-            yield (i, recvOut_lst[i], test_lst[i])
+            yield (i, False)
 
     

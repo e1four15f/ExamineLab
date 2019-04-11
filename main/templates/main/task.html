@@ -1,0 +1,75 @@
+{% extends 'main/header.html' %}
+
+{% block content %}
+    <div class="row">
+
+        <h3>{{ task.title }}</h3>
+        <p>{{ task.summary }}</p>
+
+        <div class="col s8">
+            <form action="#">
+                <div class="file-field input-field">
+                    <div class="btn">
+                        <span>Загрузить файл</span>
+                        <input type="file">
+                    </div>
+                    <div class="file-path-wrapper"><input class="file-path validate" type="text">
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="input-field col s4">
+            <select>
+                <!-- TODO получать список языков из бд-->
+                <option value="1">Python</option>
+                <option value="2">C++</option>
+                <option value="3">Java</option>
+            </select>
+            <label>Язык</label>
+        </div>
+
+        <form method="post" tabindex="-1">
+            {% csrf_token %}
+            {{ form }}
+            <p><input type="submit" value="Submit"></p>
+        </form>
+        
+        <div class="input-field col s6">
+            <h4>Решение задачи</h4>
+            <span style="white-space: pre-line">{{ task.solution }}</span>
+        </div>
+
+
+        <div class="input-field col s6">
+            <h4>Тесты</h4>
+            {% for test in tests %}
+                <span>{{ test.title }}</span>
+                {% if not passed %}
+                    <i class="tiny material-icons yellow">cached</i>
+                {% else %}
+                    {% if passed|get_item:test.title %}
+                        <i class="tiny material-icons green">check</i>
+                    {% else %}
+                        <i class="tiny material-icons red">close</i>
+                    {% endif %}
+                {% endif %}
+                </br>
+            {% endfor %}
+        </div>
+    </div>
+
+    
+    <script>
+        $(document).ready(function(){
+            $('select').formSelect();
+        });
+
+        $(document).keydown(function(objEvent) {
+            if (objEvent.keyCode == 9) {  //tab pressed
+               objEvent.preventDefault(); // stops its action
+            }
+        })
+    </script>
+{% endblock %}
+
