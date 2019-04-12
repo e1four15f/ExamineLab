@@ -34,13 +34,12 @@ def task_single_slug(request, single_slug, task_single_slug):
             if form.is_valid():
                 test_checker = testReciever.TestReciever('python3.7')
                 
-                tests_paths = os.listdir('temp/tests')
-                print(tests_paths)
+                tests_paths = [os.path.abspath('./temp/tests/'+p) for p in os.listdir('./temp/tests')]
+                #print(tests_paths)
                 user_code_hash = 'program' + str(hash(form.data['submit_solution'])) + '.py'
                 with open(user_code_hash,'w') as user_pr:
                     user_pr.write(form.data['submit_solution'])
                 passed = test_checker.perform_testing(user_code_hash,'temp/inputs',tests_paths)
-                
                 os.remove(user_code_hash)
                 return render(request=request,
                       template_name='main/task.html',

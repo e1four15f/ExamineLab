@@ -51,7 +51,6 @@ class TestReciever:
         '''
         Returns one test 
         '''
-        path = self.pathMapping[uri]
         return load_file(path, preproc)
     
     def get_tests_by_paths(self, paths, preproc = None):
@@ -68,10 +67,8 @@ class TestReciever:
         else:
             subproc_args = [self.launchCommand] + args + [os.path.abspath(user_pr_path)]
             
-        #proc = subprocess.Popen(subproc_args, stdout=subprocess.PIPE)
-        #threading.Timer(5, proc.terminate())
-        proc = subprocess.run(subproc_args, input = uinput, capture_output=True, encoding='utf-8')
-        print(f'in spawn_user_proc -- {proc.stdout} -- {proc.args}')
+        proc = subprocess.run(subproc_args, input = uinput, stdout = subprocess.PIPE, encoding='utf-8')
+        #print(f'in spawn_user_proc -- {proc.stdout} -- {proc.args}')
         print(subproc_args)
         
         return proc.stdout
@@ -79,16 +76,19 @@ class TestReciever:
 
     def perform_testing(self, user_pr_path, input_dir, test_paths, test_preproc = None, input_preproc = None, args = None):
         
-        print('in perform_testing')
-        tests = [self.get_tests_by_paths(test_paths, preproc = test_preproc)]
-        inputs = list(load_from(input_dir, preproc = input_preproc))
+        tests = sorted(list(self.get_tests_by_paths(test_paths, preproc = test_preproc)))
+        inputs = sorted(list(load_from(input_dir, preproc = input_preproc)))
         program_outs = []
         for pr_input in inputs:
             program_outs.append(self.spawn_user_proc(user_pr_path, pr_input, args))
         passed = {}
 
-        print(program_outs)
+        print(f'program outs: {program_outs}')
         for i, b in verification.verifyMultiple(program_outs, tests):
-            passed[test_paths[i]] = b
+            name_index = test_paths[i].rfind('/')
+            test_title = test_paths[i][name_index + 1::]
+            passed[test_title] = b
+            print(test_paths[i])
+            print('tests: ',test_title,i,passed[test_title])
             
         return passed
