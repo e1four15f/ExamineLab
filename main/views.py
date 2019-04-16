@@ -18,7 +18,7 @@ def single_slug(request, single_slug):
                       context={'course': course,
                                'tasks': tasks})
 
-    except Course.DoesNotExist:
+    except:
         return HttpResponse('404 Course {} not found!'.format(single_slug))
 
 
@@ -47,7 +47,7 @@ def task_single_slug(request, single_slug, task_single_slug):
                                'form': form,
                                'tests': tests})
 
-    except Task.DoesNotExist:
+    except:
         return HttpResponse('404 Task {} not found!'.format(task_single_slug))
 
 
@@ -67,7 +67,7 @@ def register(request):
         form = NewUserForm(request.POST)
         if form.is_valid():
             user = form.save()
-            username = form.cleaned_data.get('username')
+            username = form.cleaned_data.get('email')
             messages.success(request, 'New Account Created: {}'.format(username))
             login(request, user)
             messages.info(request, 'You are now logged in as: {}'.format(username))

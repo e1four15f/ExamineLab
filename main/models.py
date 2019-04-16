@@ -1,5 +1,7 @@
 from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
+from django.contrib.auth.models import AbstractUser
+from .managers import UserManager
 
 
 title_size = 50
@@ -57,6 +59,37 @@ class Comment(models.Model):
 
     class Meta:
         verbose_name_plural = 'Comments'
+
+
+class PermissionGroup(models.Model):
+    name = models.CharField(max_length=40, primary_key=True)
+    description = models.CharField(max_length=400)
+
+
+class User(AbstractUser):
+    email = models.CharField(max_length=40, primary_key=True)
+    global_permission_groups = models.ForeignKey(PermissionGroup, on_delete=models.CASCADE, blank=True, null=True)
+    USERNAME_FIELD = 'email'
+    objects = UserManager()
+    REQUIRED_FIELDS = []
+
+    def has_permission(self, permission_group, course=None):
+        if course is None:
+            return len(self.global_permission_groups.all().get(name=permission_group)) == 1
+
+    def grant_permission(self, permission_group, course=None):
+        if course is None:
+            self.global_permission_groups.add(permission_group)
+
+    def withdraw_permission(self, permission_group, course=None):
+        if course is None:
+            self.global_permission_groups.remove(permission_group)
+
+
+class UserCourseSpecificPermissions(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    permission = models.ForeignKey(PermissionGroup, on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
 
 
 
