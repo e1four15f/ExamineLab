@@ -24,6 +24,7 @@ def single_slug(request, single_slug):
 
 def task_single_slug(request, single_slug, task_single_slug):
     try:
+        course = Course.objects.get(pk=int(single_slug))
         task = Task.objects.get(pk=int(task_single_slug))
         tests = Test.objects.filter(task__id=task.id).order_by('title')
 
@@ -34,7 +35,8 @@ def task_single_slug(request, single_slug, task_single_slug):
                 passed = Tester('/temp/task/', form.data['submit_solution'], tests).run()
                 return render(request=request,
                       template_name='main/task.html',
-                      context={'task': task,
+                      context={'course': course,
+                               'task': task,
                                'form': form,
                                'tests': tests,
                                'passed': passed})
@@ -43,7 +45,8 @@ def task_single_slug(request, single_slug, task_single_slug):
 
         return render(request=request,
                       template_name='main/task.html',
-                      context={'task': task,
+                      context={'course': course,
+                               'task': task,
                                'form': form,
                                'tests': tests})
 

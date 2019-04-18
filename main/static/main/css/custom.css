@@ -1,0 +1,20 @@
+/* Custom Styles */
+nav.clean {
+	background: none;
+	box-shadow: none; }
+
+nav.clean .breadcrumb {
+	color: black; }
+	
+nav.clean .breadcrumb:hover {
+	color: #ee6e73; }
+  
+nav.clean .breadcrumb:before {
+	color: rgba(0, 0, 0, 0.7); }
+
+nav.clean .breadcrumb:first-child:before {
+	display: inline-block; }
+
+nav.clean {
+	height: 0px; }
+	
