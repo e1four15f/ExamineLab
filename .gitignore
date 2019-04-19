@@ -25,6 +25,10 @@ wheels/
 *.egg
 MANIFEST
 temp/
+*~
+*.swp
+*.swo
+*.py
 .vscode/
 
 # PyInstaller

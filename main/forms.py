@@ -26,4 +26,3 @@ class SubmitForm(forms.Form):
 
     class Meta:
         fields = ('code')
-
