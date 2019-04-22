@@ -6,8 +6,8 @@ from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
 from .forms import NewUserForm, SubmitForm
 
-from modules.tester import Tester
-
+from modules.Tests import testReciever 
+import os
 
 def single_slug(request, single_slug):
     try:
@@ -24,6 +24,7 @@ def single_slug(request, single_slug):
 
 def task_single_slug(request, single_slug, task_single_slug):
     try:
+        course = Course.objects.get(pk=int(single_slug))
         task = Task.objects.get(pk=int(task_single_slug))
         tests = Test.objects.filter(task__id=task.id).order_by('title')
 
@@ -31,10 +32,19 @@ def task_single_slug(request, single_slug, task_single_slug):
             form = SubmitForm(request.POST)
 
             if form.is_valid():
-                passed = Tester('/temp/task/', form.data['submit_solution'], tests).run()
+                test_checker = testReciever.TestReciever('python3')
+                
+                #tests_paths = [os.path.abspath('./temp/tests/'+p) for p in os.listdir('./temp/tests')]
+                #print(tests_paths)
+                user_code_hash = 'program' + str(hash(form.data['submit_solution'])) + '.py'
+                with open(user_code_hash,'w') as user_pr:
+                    user_pr.write(form.data['submit_solution'])
+                passed = test_checker.perform_testing(user_code_hash, tests)
+                os.remove(user_code_hash)
                 return render(request=request,
                       template_name='main/task.html',
-                      context={'task': task,
+                      context={'course': course,
+                               'task': task,
                                'form': form,
                                'tests': tests,
                                'passed': passed})
@@ -43,7 +53,8 @@ def task_single_slug(request, single_slug, task_single_slug):
 
         return render(request=request,
                       template_name='main/task.html',
-                      context={'task': task,
+                      context={'course': course,
+                               'task': task,
                                'form': form,
                                'tests': tests})
 
