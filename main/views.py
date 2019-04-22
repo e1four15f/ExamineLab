@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
-from .models import Course, Task, Test
+from .models import Course, Task, Test, PermissionGroup, Permission
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
@@ -8,6 +8,28 @@ from .forms import NewUserForm, SubmitForm
 
 from modules.Tests import testReciever 
 import os
+
+
+def test(request):
+    print(request.user.email)
+
+    per1,created = Permission.objects.get_or_create(name='1', description='Open')
+    print(created)
+    per2,created = Permission.objects.get_or_create(name='2', description='Close')
+    print(created)
+    per1.save()
+    per2.save()
+    pg,created = PermissionGroup.objects.get_or_create(name='pg1', description='pg1')
+    print(pg)
+    pg.permissions.add(per1)
+    pg.permissions.remove(per2)
+    pg.save()
+    request.user.add_permission_group(pg)
+    request.user.save()
+    print(request.user.global_permission_groups.last().permissions.all())
+    print(request.user.has_permission(permission_id_list=[1, 2]))
+
+    return HttpResponse()
 
 def single_slug(request, single_slug):
     try:

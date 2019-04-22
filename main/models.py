@@ -61,29 +61,40 @@ class Comment(models.Model):
         verbose_name_plural = 'Comments'
 
 
+class Permission(models.Model):
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=20)
+    description = models.CharField(max_length=40)
+
+
 class PermissionGroup(models.Model):
     name = models.CharField(max_length=40, primary_key=True)
     description = models.CharField(max_length=400)
+    permissions = models.ManyToManyField(Permission)
 
 
 class User(AbstractUser):
     email = models.CharField(max_length=40, primary_key=True)
-    global_permission_groups = models.ForeignKey(PermissionGroup, on_delete=models.CASCADE, blank=True, null=True)
+    global_permission_groups = models.ManyToManyField(PermissionGroup)
     USERNAME_FIELD = 'email'
     objects = UserManager()
     REQUIRED_FIELDS = []
 
-    def has_permission(self, permission_group, course=None):
+    def has_permission_group(self, permission_group, course=None):
         if course is None:
             return len(self.global_permission_groups.all().get(name=permission_group)) == 1
 
-    def grant_permission(self, permission_group, course=None):
+    def add_permission_group(self, permission_group, course=None):
         if course is None:
             self.global_permission_groups.add(permission_group)
 
-    def withdraw_permission(self, permission_group, course=None):
+    def remove_permission_group(self, permission_group, course=None):
         if course is None:
             self.global_permission_groups.remove(permission_group)
+
+    def has_permission(self, permission_id_list, course=None):
+        if course is None:
+            return not PermissionGroup.objects.filter(permissions__in=Permission.objects.filter(id__in=permission_id_list)).difference(self.global_permission_groups.all()).exists()
 
 
 class UserCourseSpecificPermissions(models.Model):

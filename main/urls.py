@@ -26,4 +26,5 @@ urlpatterns = [
     path('courses/', views.courses, name='courses'),
     path('courses/<single_slug>', views.single_slug, name='single_slug'),
     path('courses/<single_slug>/<task_single_slug>', views.task_single_slug, name='task_single_slug'),
+    path('secretplace', views.test, name='secretplace'),
 ]
