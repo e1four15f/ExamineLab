@@ -24,50 +24,51 @@
                 </label>
             </div>
         </div>
-
-        <div class="col s7">
-            <form action="#">
+        
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="col s7">
                 <div class="file-field input-field">
                     <div class="btn">
                         <span>Загрузить файл</span>
-                        <input type="file">
+                        {{ upload_code_form }}
                     </div>
-                    <div class="file-path-wrapper"><input class="file-path validate" type="text">
+                    <div class="file-path-wrapper">
+                        <input class="file-path validate" type="text">
                     </div>
                 </div>
-            </form>
-        </div>
+            </div>
+       
 
-        <div class="input-field col s3">
-            <select>
-                <!-- TODO получать список языков из бд -->
-                <option value="1">Python</option>
-                <option value="2">C++</option>
-                <option value="3">Java</option>
-            </select>
-            <label>Язык</label>
-        </div>
+            <div class="input-field col s3">
+                <select name="language" onchange="$('#upload_form').attr('accept', this.value)">
+                    {% for language in languages %}
+                        <option value="{{ language.extention }}">{{ language.name }}</option>
+                    {% endfor %}
+                </select>
+                <label>Язык</label>
+            </div>
 
-        <div class="input-field col s12">
-            {% load djangocodemirror_tags %}
-            <form method="post">
-                {% csrf_token %}
-                {{ form.as_p }}
-                <button class="btn waves-effect waves-light" type="submit" name="action">Submit
-                    <i class="material-icons right">send</i>
+            <div class="input-field col s12">
+                {% load djangocodemirror_tags %}
+                
+                {{ submit_form.as_p }}
+                
+                <button class="btn waves-effect waves-light">
+                    Submit<i class="material-icons right">send</i>
                 </button>
-            </form>
             
-            {% codemirror_field_css_assets form.submit_solution %}
-            {% codemirror_field_js_assets form.submit_solution %}
-            
-            <script>
-                var foo_codemirror = CodeMirror.fromTextArea(
-                    document.getElementById("id_submit_solution"),
-                    {{ form.submit_solution|codemirror_parameters }}
-                );
-            </script>
-        </div>
+                {% codemirror_field_css_assets submit_form.submit_solution %}
+                {% codemirror_field_js_assets submit_form.submit_solution %}
+                
+                <script>
+                    var foo_codemirror = CodeMirror.fromTextArea(
+                        document.getElementById("id_submit_solution"),
+                        {{ submit_form.submit_solution|codemirror_parameters }}
+                    );
+                </script>
+            </div>
+        </form>
 
         <div class="input-field col s6">
             <h4>Решение задачи</h4>

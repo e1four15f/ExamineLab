@@ -4,7 +4,6 @@ from django.contrib.auth.models import User
 from djangocodemirror.fields import CodeMirrorField
 
 
-
 class NewUserForm(UserCreationForm):
     email = forms.EmailField(required=True)
 
@@ -26,3 +25,11 @@ class SubmitForm(forms.Form):
 
     class Meta:
         fields = ('code')
+
+
+class UploadCodeForm(forms.Form):
+    widget = forms.ClearableFileInput(attrs={
+            'id': 'upload_form',
+            'accept': '.py'})
+
+    file = forms.FileField(label='', required=False, widget=widget)

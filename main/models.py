@@ -59,6 +59,18 @@ class Comment(models.Model):
         verbose_name_plural = 'Comments'
 
 
+class Language(models.Model):
+    """Таблица с языками программировани"""
+    name = models.CharField(max_length=50)
+    extention = models.CharField(max_length=10)
+    
+    class Meta:
+        verbose_name_plural = 'Languages'
+
+    def __str__(self):
+        return self.name
+
+
 
 
 

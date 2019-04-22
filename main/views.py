@@ -1,10 +1,10 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
-from .models import Course, Task, Test
+from .models import Course, Task, Test, Language
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
-from .forms import NewUserForm, SubmitForm
+from .forms import NewUserForm, SubmitForm, UploadCodeForm
 
 from modules.Tests import testReciever 
 import os
@@ -29,33 +29,44 @@ def task_single_slug(request, single_slug, task_single_slug):
         tests = Test.objects.filter(task__id=task.id).order_by('title')
 
         if request.method == 'POST':
-            form = SubmitForm(request.POST)
+            submit_form = SubmitForm(request.POST)
+            upload_code_form = UploadCodeForm(request.POST, request.FILES)
+            
+            if submit_form.is_valid():
+                # type(uploaded_code) = <class 'django.core.files.uploadedfile.InMemoryUploadedFile'>
+                uploaded_code = request.FILES.get('file') 
+                # .py .cpp .java etc
+                selected_language = request.POST['language']
+                submited_solution = submit_form.data['submit_solution']
 
-            if form.is_valid():
-                test_checker = testReciever.TestReciever('python3')
+                test_checker = testReciever.TestReciever('python')
                 
-                #tests_paths = [os.path.abspath('./temp/tests/'+p) for p in os.listdir('./temp/tests')]
-                #print(tests_paths)
-                user_code_hash = 'program' + str(hash(form.data['submit_solution'])) + '.py'
+                user_code_hash = 'program' + str(hash(submited_solution)) + '.py'
                 with open(user_code_hash,'w') as user_pr:
-                    user_pr.write(form.data['submit_solution'])
+                    user_pr.write(submited_solution)
+
                 passed = test_checker.perform_testing(user_code_hash, tests)
                 os.remove(user_code_hash)
                 return render(request=request,
                       template_name='main/task.html',
-                      context={'course': course,
+                      context={'languages': Language.objects.all(),
+                               'course': course,
                                'task': task,
-                               'form': form,
+                               'submit_form': submit_form,
+                               'upload_code_form': upload_code_form,
                                'tests': tests,
                                'passed': passed})
         else:
-            form = SubmitForm()
+            submit_form = SubmitForm()
+            upload_code_form = UploadCodeForm()
 
         return render(request=request,
                       template_name='main/task.html',
-                      context={'course': course,
+                      context={'languages': Language.objects.all(),
+                               'course': course,
                                'task': task,
-                               'form': form,
+                               'submit_form': submit_form,
+                               'upload_code_form': upload_code_form,
                                'tests': tests})
 
     except Task.DoesNotExist:

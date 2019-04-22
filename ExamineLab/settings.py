@@ -16,9 +16,9 @@ from djangocodemirror.helper import codemirror_settings_update
 
 CODEMIRROR_SETTINGS['my_mode'] = {
     'mode': {  
-        'name': 'python',
-        'version': 3,
-        'singleLineStringErrors': False,
+        'name': 'javascript',
+        #'version': 3,
+        #'singleLineStringErrors': False,
     },
     'tabSize': 2,
     'theme': 'eclipse',
@@ -33,7 +33,7 @@ CODEMIRROR_SETTINGS['my_mode'] = {
     'autofocus': True,
     'scrollbarStyle': 'overlay',
     'modes': [  
-        'python'
+        'javascript'
     ],
     'keyMap': 'sublime',
     'autoCloseBrackets': '()[]{}\'\'""',
