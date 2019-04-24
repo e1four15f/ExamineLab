@@ -2,8 +2,8 @@ from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.contrib.auth.models import AbstractUser
 from .managers import UserManager
-
-
+import datetime, os
+import ExamineLab.settings as settings
 title_size = 50
 summary_size = 400
 
@@ -76,6 +76,8 @@ class PermissionGroup(models.Model):
 class User(AbstractUser):
     email = models.CharField(max_length=40, primary_key=True)
     global_permission_groups = models.ManyToManyField(PermissionGroup)
+    courses = models.ManyToManyField(Course, through='UserCourseParticipation')
+    avatar = models.ImageField(null=True)
     USERNAME_FIELD = 'email'
     objects = UserManager()
     REQUIRED_FIELDS = []
@@ -94,7 +96,16 @@ class User(AbstractUser):
 
     def has_permission(self, permission_id_list, course=None):
         if course is None:
-            return not PermissionGroup.objects.filter(permissions__in=Permission.objects.filter(id__in=permission_id_list)).difference(self.global_permission_groups.all()).exists()
+            return not Permission.objects.filter(models.Q(id__in=permission_id_list) & ~models.Q(permissiongroup__in=self.global_permission_groups.all())).exists()
+
+    def add_course(self, course, date=None):
+        self.courses.add(course, through_defaults={'date_joined': datetime.date.today()})
+
+    def remove_course(self, course):
+        self.courses.remove(course)
+
+    def get_courses(self, offset, entries):
+        return self.courses.all()[offset:offset+entries]
 
 
 class UserCourseSpecificPermissions(models.Model):
@@ -102,9 +113,10 @@ class UserCourseSpecificPermissions(models.Model):
     permission = models.ForeignKey(PermissionGroup, on_delete=models.CASCADE)
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
 
-
-
-
+class UserCourseParticipation(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    date_joined = models.DateField()
 
 
 

@@ -22,14 +22,27 @@ def test(request):
     pg,created = PermissionGroup.objects.get_or_create(name='pg1', description='pg1')
     print(pg)
     pg.permissions.add(per1)
-    pg.permissions.remove(per2)
+    pg.permissions.add(per2)
     pg.save()
+    per1, created = Course.objects.get_or_create(title='C++', summary='C++ Course')
+    per2, created = Course.objects.get_or_create(title='Java', summary='Java Course')
+    per1.save()
+    per2.save()
     request.user.add_permission_group(pg)
+    request.user.add_course(per1)
+    request.user.add_course(per2)
     request.user.save()
     print(request.user.global_permission_groups.last().permissions.all())
-    print(request.user.has_permission(permission_id_list=[1, 2]))
+    print(request.user.has_permission(permission_id_list=[2]))
+    print(request.user.get_courses(1,1))
+
 
     return HttpResponse()
+
+def profile(request):
+    return render(request=request,
+                  template_name='main/profile.html',
+                  context={'user': request.user})
 
 def single_slug(request, single_slug):
     try:

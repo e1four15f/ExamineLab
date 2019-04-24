@@ -1,6 +1,7 @@
-certifi==2018.8.24
-Django==2.1.1
-jsmin==2.2.2
-pytz==2018.5
-wincertstore==0.2
-djangocodemirror==2.0.0
+certifi
+Django
+jsmin
+pytz
+wincertstore
+djangocodemirror
+Pillow
