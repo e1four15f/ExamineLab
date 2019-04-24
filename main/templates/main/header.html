@@ -1,3 +1,4 @@
+
 <head>
     {% load static %}
     <!-- Compiled and minified Materialize CSS -->
@@ -15,6 +16,7 @@
     <link href="{% static 'CodeMirror/theme/eclipse.css' %}" rel="stylesheet">
     <!-- monokai, dracula, blackboard -->
     <link href="{% static 'CodeMirror/addon/scroll/simplescrollbars.css' %}" rel="stylesheet">
+
 </head>
 
 <body>
@@ -29,3 +31,5 @@
     </div>
 
 </body>
+{%block header%}
+    {%endblock%}

@@ -1,10 +1,11 @@
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseNotFound, HttpResponseForbidden, HttpResponseBadRequest
 from .models import Course, Task, Test, PermissionGroup, Permission
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
 from .forms import NewUserForm, SubmitForm
+from django.views.decorators.csrf import csrf_exempt
 
 from modules.Tests import testReciever 
 import os
@@ -40,9 +41,31 @@ def test(request):
     return HttpResponse()
 
 def profile(request):
+    if request.user.is_anonymous:
+        return HttpResponseNotFound()
     return render(request=request,
                   template_name='main/profile.html',
                   context={'user': request.user})
+
+@csrf_exempt
+def course_participation_management(request):
+    if request.user is None or request.user.is_anonymous:
+        return HttpResponseForbidden()
+    elif 'course_id' not in request.POST or 'action' not in request.POST:
+        print(request.body)
+        return HttpResponseBadRequest()
+    else:
+        try:
+            course = Course.objects.get(pk=int(request.POST['course_id']))
+            if request.POST['action'] == 'enroll':
+                request.user.add_course(course)
+                request.user.save()
+                return HttpResponse()
+            else:
+                request.user.remove_course(course)
+                return HttpResponse()
+        except:
+            return HttpResponseBadRequest()
 
 def single_slug(request, single_slug):
     try:
@@ -103,9 +126,12 @@ def homepage(request):
 
 
 def courses(request):
+    #Временное решение!
+    courses_attended = request.user.courses.all()
+    courses_other = Course.objects.difference(courses_attended)
     return render(request=request,
                   template_name='main/courses.html',
-                  context={'courses': Course.objects.all})
+                  context={'courses_attended': courses_attended, 'courses_other': courses_other})
 
 
 def register(request):
