@@ -1,13 +1,15 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 from django.http import HttpResponse
 from .models import Course, Task, Test, Language
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
-from .forms import NewUserForm, SubmitForm, UploadCodeForm
+from .forms import NewUserForm, EditorSubmitForm, UploadCodeForm, SelectLanguageForm
 
+from djangocodemirror.settings import CODEMIRROR_SETTINGS
 from modules.Tests import testReciever 
 import os
+
 
 def single_slug(request, single_slug):
     try:
@@ -28,16 +30,16 @@ def task_single_slug(request, single_slug, task_single_slug):
         task = Task.objects.get(pk=int(task_single_slug))
         tests = Test.objects.filter(task__id=task.id).order_by('title')
 
-        if request.method == 'POST':
-            submit_form = SubmitForm(request.POST)
-            upload_code_form = UploadCodeForm(request.POST, request.FILES)
-            
-            if submit_form.is_valid():
+        if request.is_ajax():
+            selected_language = request.POST['language'].lower()
+            if 'solution' in request.POST:
+                editor_submit_form = EditorSubmitForm(request.POST)
+                upload_code_form = UploadCodeForm(request.POST, request.FILES)
+                select_language_form = SelectLanguageForm(request.POST)
+                
                 # type(uploaded_code) = <class 'django.core.files.uploadedfile.InMemoryUploadedFile'>
                 uploaded_code = request.FILES.get('file') 
-                # .py .cpp .java etc
-                selected_language = request.POST['language']
-                submited_solution = submit_form.data['submit_solution']
+                submited_solution = editor_submit_form.data['solution']
 
                 test_checker = testReciever.TestReciever('python')
                 
@@ -46,27 +48,34 @@ def task_single_slug(request, single_slug, task_single_slug):
                     user_pr.write(submited_solution)
 
                 passed = test_checker.perform_testing(user_code_hash, tests)
+                
+                #if all(result for result in passed.values()):
+                    #messages.success(request, 'Задание пройдено!')
                 os.remove(user_code_hash)
                 return render(request=request,
-                      template_name='main/task.html',
-                      context={'languages': Language.objects.all(),
-                               'course': course,
-                               'task': task,
-                               'submit_form': submit_form,
-                               'upload_code_form': upload_code_form,
-                               'tests': tests,
-                               'passed': passed})
+                        template_name='main/includes/tests.html',
+                        context={'tests': tests,
+                                'passed': passed})
+            else:
+                editor_submit_form = EditorSubmitForm()
+                return render(request=request,
+                        template_name='main/includes/editor.html',
+                        context={'editor_submit_form': editor_submit_form,
+                                'language': selected_language})
+            
         else:
-            submit_form = SubmitForm()
+            editor_submit_form = EditorSubmitForm()
             upload_code_form = UploadCodeForm()
+            select_language_form = SelectLanguageForm()
 
         return render(request=request,
                       template_name='main/task.html',
                       context={'languages': Language.objects.all(),
                                'course': course,
                                'task': task,
-                               'submit_form': submit_form,
+                               'editor_submit_form': editor_submit_form,
                                'upload_code_form': upload_code_form,
+                               'select_language_form': select_language_form,
                                'tests': tests})
 
     except Task.DoesNotExist:

@@ -10,7 +10,7 @@
                     <a href="/courses/{{ course.id }}" class="breadcrumb">{{ course.title }}</a>
                 </div>
             </div>
-        </nav>
+        </nav>  
 
         <h3>{{ task.title }}</h3>
         <p>{{ task.summary }}</p>
@@ -24,12 +24,14 @@
                 </label>
             </div>
         </div>
-        
-        <form method="post" enctype="multipart/form-data">
+
+        <form id="select-language-form" method="post">{% csrf_token %}</form>
+        <form id="all-forms" method="post" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="col s7">
                 <div class="file-field input-field">
-                    <div class="btn">
+                    <div class="btn" style="width: 200px">
+                        <i class="material-icons right">attach_file</i>
                         <span>Загрузить файл</span>
                         {{ upload_code_form }}
                     </div>
@@ -39,57 +41,28 @@
                 </div>
             </div>
        
-
             <div class="input-field col s3">
-                <select name="language" onchange="$('#upload_form').attr('accept', this.value)">
-                    {% for language in languages %}
-                        <option value="{{ language.extention }}">{{ language.name }}</option>
-                    {% endfor %}
-                </select>
-                <label>Язык</label>
+                {{ select_language_form }}
+                <label>Язык</label>   
             </div>
 
-            <div class="input-field col s12">
-                {% load djangocodemirror_tags %}
-                
-                {{ submit_form.as_p }}
-                
+            <div id="editor" class="input-field col s12">
+                {{ editor_submit_form.as_p }}
                 <button class="btn waves-effect waves-light">
-                    Submit<i class="material-icons right">send</i>
+                    Отправить решение<i class="material-icons right">send</i>
                 </button>
-            
-                {% codemirror_field_css_assets submit_form.submit_solution %}
-                {% codemirror_field_js_assets submit_form.submit_solution %}
-                
-                <script>
-                    var foo_codemirror = CodeMirror.fromTextArea(
-                        document.getElementById("id_submit_solution"),
-                        {{ submit_form.submit_solution|codemirror_parameters }}
-                    );
-                </script>
+                {% include "main/includes/editor.html" with language="python" %}
             </div>
         </form>
+
 
         <div class="input-field col s6">
             <h4>Решение задачи</h4>
             <span style="white-space: pre-line">{{ task.solution }}</span>
         </div>
 
-        <div class="input-field col s6">
-            <h4>Тесты</h4>
-            {% for test in tests %}
-                <span>{{ test.title }}</span>
-                {% if not passed %}
-                    <i class="tiny material-icons yellow">cached</i>
-                {% else %}
-                    {% if passed|get_item:test.title %}
-                        <i class="tiny material-icons green">check</i>
-                    {% else %}
-                        <i class="tiny material-icons red">close</i>
-                    {% endif %}
-                {% endif %}
-                </br>
-            {% endfor %}
+        <div id="tests" class="input-field col s6">
+            {% include "main/includes/tests.html" %}      
         </div>
     </div>
 
@@ -97,6 +70,55 @@
     <script>
         $(document).ready(function(){
             $('select').formSelect();
+            $('#id_language').attr('name', 'language');
+            $('#select-language-form').submit(function(e){
+                e.preventDefault();
+                var form = $(this);
+                var language = $('select').children("option:selected").text()
+                var re = new RegExp("language=.+", 'g')
+                var data = form.serialize().replace(re, "language=" + language)
+
+                $.ajax({
+                    url: form.attr("action"),
+                    method: form.attr("method"),
+                    data: data,
+                    success: function(response) {
+                        var style = $('div.CodeMirror').hasClass('cm-s-material')
+
+                        var solution = foo_codemirror.getValue();  
+                        $("#editor").append(response);
+                        $("#editor > p > div:nth-child(4)").remove()
+                        foo_codemirror.setValue(solution)
+
+                        if (style) { 
+                            var el = $('div.CodeMirror');
+                            el.removeClass('cm-s-eclipse'); 
+                            el.addClass('cm-s-material'); 
+                        }
+                    }
+                });
+            });
+
+            $('#all-forms').submit(function(e){
+                e.preventDefault();
+                var form = $(this);
+
+                var solution = foo_codemirror.getValue();
+                var re = new RegExp("solution=?.+", 'g')
+                var data = form.serialize().replace(re, "solution=" + solution)
+                
+                var language = $('select').children("option:selected").text()
+                data += '&language=' + language;
+                
+                $.ajax({
+                    url: form.attr("action"),
+                    method: form.attr("method"),
+                    data: data,
+                    success: function(response) {
+                        $("#tests").empty().append(response);
+                    }
+                });
+            });
         });
 
         $('#switch-mode').click(function(){

@@ -1,0 +1,12 @@
+{% load djangocodemirror_tags %}
+{% codemirror_field_css_assets editor_submit_form.solution %}
+{% codemirror_field_js_assets editor_submit_form.solution %}
+<script type="text/javascript" src="/static/CodeMirror/mode/{{ language }}/{{ language }}.js"></script>
+<script>
+    var foo_codemirror = CodeMirror.fromTextArea(
+        document.getElementById("id_solution"),
+        {{ editor_submit_form.solution|codemirror_parameters }}
+    );
+    $('div.CodeMirror').css('height', '70%');
+    $('.CodeMirror').css('border', '1px solid #ddd')
+</script>

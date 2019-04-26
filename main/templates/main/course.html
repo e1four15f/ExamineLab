@@ -19,7 +19,11 @@
                   <div class="collapsible-header"><i class="material-icons">filter_drama</i>{{ t.title }}</div>
                   <div class="collapsible-body">
                       <span>{{ t.summary }}</span>
-                      <span>{{ t.rating }}</span>
+                      <p>
+                        {% for i in i|rjust:t.rating %}
+                            <i class="material-icons" style="color: orange;">star</i>
+                        {% endfor %}
+                      </p>
                       <a href="{{ course.id }}/{{ t.id }}" class="waves-effect waves-light btn">Начать!</a>
                   </div>
                 </li>
