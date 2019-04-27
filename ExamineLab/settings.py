@@ -9,8 +9,57 @@ https://docs.djangoproject.com/en/2.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.1/ref/settings/
 """
-
 import os
+from djangocodemirror.settings import *
+from djangocodemirror.helper import codemirror_settings_update
+
+
+CODEMIRROR_SETTINGS['my_mode'] = {
+    'mode': {  
+        'name': 'javascript',
+        #'version': 3,
+        #'singleLineStringErrors': False,
+    },
+    'tabSize': 2,
+    'theme': 'eclipse',
+    #'spellcheck': True,
+    #'autocorrect': True,
+    'extraKeys': {  
+        'Ctrl-Q': 'toggleComment',
+        #'Ctrl-Space': 'autocomplete',
+    },
+    'lineNumbers': True,
+    'lineWrapping': True,
+    'autofocus': True,
+    'scrollbarStyle': 'overlay',
+    'modes': [  
+        'javascript'
+    ],
+    'keyMap': 'sublime',
+    'autoCloseBrackets': '()[]{}\'\'""',
+    
+    #'styleActiveLine': True,
+
+    'matchBrackets': True,
+    'highlightSelectionMatches': True,
+    'addons': [  
+        'CodeMirror/addon/edit/matchbrackets.js',
+        'CodeMirror/addon/comment/comment.js',
+        'CodeMirror/addon/scroll/simplescrollbars.js',
+        'CodeMirror/addon/edit/closebrackets.js',
+        'CodeMirror/keymap/sublime.js',
+        
+        
+        #'CodeMirror/addon/selection/active-line.js',
+        #'CodeMirror/addon/hint/show-hint.js',
+        #'CodeMirror/addon/hint/anyword-hint.js',
+        #'CodeMirror/addon/hint/python-hint.js',
+    ]
+}
+# TODO Добавить больше функционала 
+# anywordhint, activeline, complete, match-highlighter, placeholder, search
+# fullscreen, lint
+
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -38,7 +87,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'main.apps.MainConfig',
-    'tinymce',
+    'djangocodemirror'
 ]
 
 MIDDLEWARE = [
