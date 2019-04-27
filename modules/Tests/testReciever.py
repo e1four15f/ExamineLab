@@ -59,7 +59,6 @@ class TestReciever:
 
     def spawn_user_proc(self, uinput)-> tuple:
 
-        print(self.launch_command)
         proc = subprocess.run(self.launch_command, input = uinput, stdout = subprocess.PIPE, stderr = subprocess.PIPE, encoding='utf-8', shell = True)
         #print(f'in spawn_user_proc -- {proc.stdout} -- {proc.args}')
         
@@ -76,7 +75,10 @@ class TestReciever:
             
         
         passed = {}
-        print(f'program outs: {program_outs}')
+        print(f'program inputs: {inputs}')
+        print(f'program outs  : {program_outs}')
+
+        print(f'tests         : {output}')
         for i, b in verification.verifyMultiple([stdout[0] for stdout in program_outs], output):
             passed[tests[i].title] = b
             print('tests: ', tests[i].title, i, passed[tests[i].title])

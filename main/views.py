@@ -42,9 +42,10 @@ def task_single_slug(request, single_slug, task_single_slug):
                 submited_solution = submit_form.data['submit_solution']
 
 
-                print(repr(selected_language))
                 user_code = uploaded_code.read() if uploaded_code != None else submited_solution
+
                 passed, outs = testReciever.perform_testing_from_text(user_code, tests, selected_language)
+
                 Logs(name = selected_language, stdout = outs[0][0], stderr = outs[0][1]).save()
 
                 return render(request=request,
@@ -55,7 +56,9 @@ def task_single_slug(request, single_slug, task_single_slug):
                                'submit_form': submit_form,
                                'upload_code_form': upload_code_form,
                                'tests': tests,
-                               'passed': passed})
+                               'passed': passed,
+                               'error': outs[0][1]})
+
         else:
             submit_form = SubmitForm()
             upload_code_form = UploadCodeForm()
