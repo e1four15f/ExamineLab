@@ -86,7 +86,14 @@ class TestReciever:
 
 def perform_testing_from_text(user_pr_text, tests, language, test_preproc = None, input_preproc = None):
 
-    launch_command, lang, optargs = language.launch_command, language.extention, language.optional
+    lang, launch_command, optargs = language.extention, None, None
+
+    if os.name == 'posix':
+        launch_command = language.launch_command_linux
+        optargs = language.optional_linux
+    else:
+        launch_command = language.launch_command_win
+        optargs = language.optional_win
 
     user_hash = 'program' + str(hash(user_pr_text))
     user_code_pth = user_hash + lang
