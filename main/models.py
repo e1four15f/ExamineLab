@@ -59,6 +59,38 @@ class Comment(models.Model):
         verbose_name_plural = 'Comments'
 
 
+class Language(models.Model):
+    """Таблица с языками программировани"""
+    name = models.CharField(max_length=50, primary_key=True)
+    extention = models.CharField(max_length=10)
+    launch_command = models.CharField(max_length=50)
+    optional = models.CharField(max_length=350,default='rm <path>*')
+
+    class Meta:
+        verbose_name_plural = 'Languages'
+
+    def __str__(self):
+        return self.name
+
+
+class Logs(models.Model):
+    """Таблица с логами запусков программ пользователей"""
+    name = models.ForeignKey(Language, on_delete = models.CASCADE)
+    stdout = models.TextField(blank = True)    
+    stderr = models.TextField(blank = True)
+
+    class Meta:
+        verbose_name_plural = 'Logs'
+
+    def __str__(self):
+        return '{}: {} | {}'.format(self.name.name, self.stderr, self.stdout[:20])
+
+
+
+
+
+
+
 
 
 

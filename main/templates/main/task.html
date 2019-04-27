@@ -3,43 +3,77 @@
 {% block content %}
     <div class="row">
 
+        <nav class="clean">
+            <div class="nav-wrapper">
+                <div class="col s12">
+                    <a href="/courses" class="breadcrumb">Курсы</a>
+                    <a href="/courses/{{ course.id }}" class="breadcrumb">{{ course.title }}</a>
+                </div>
+            </div>
+        </nav>
+
         <h3>{{ task.title }}</h3>
         <p>{{ task.summary }}</p>
 
-        <div class="col s8">
-            <form action="#">
+        <div class="col s2">
+            <div class="switch">
+                <label>
+                    <p>Night mode</p>
+                    <input id="switch-mode" type="checkbox">
+                    <span class="lever"></span>
+                </label>
+            </div>
+        </div>
+        
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="col s7">
                 <div class="file-field input-field">
                     <div class="btn">
                         <span>Загрузить файл</span>
-                        <input type="file">
+                        {{ upload_code_form }}
                     </div>
-                    <div class="file-path-wrapper"><input class="file-path validate" type="text">
+                    <div class="file-path-wrapper">
+                        <input class="file-path validate" type="text">
                     </div>
                 </div>
-            </form>
-        </div>
+            </div>
+       
 
-        <div class="input-field col s4">
-            <select>
-                <!-- TODO получать список языков из бд-->
-                <option value="1">Python</option>
-                <option value="2">C++</option>
-                <option value="3">Java</option>
-            </select>
-            <label>Язык</label>
-        </div>
+            <div class="input-field col s3">
+                <select name="language" onchange="$('#upload_form').attr('accept', this.value)">
+                    {% for language in languages %}
+                        <option value="{{ language.extention }}">{{ language.name }}</option>
+                    {% endfor %}
+                </select>
+                <label>Язык</label>
+            </div>
 
-        <form method="post" tabindex="-1">
-            {% csrf_token %}
-            {{ form }}
-            <p><input type="submit" value="Submit"></p>
+            <div class="input-field col s12">
+                {% load djangocodemirror_tags %}
+                
+                {{ submit_form.as_p }}
+                
+                <button class="btn waves-effect waves-light">
+                    Submit<i class="material-icons right">send</i>
+                </button>
+            
+                {% codemirror_field_css_assets submit_form.submit_solution %}
+                {% codemirror_field_js_assets submit_form.submit_solution %}
+                
+                <script>
+                    var foo_codemirror = CodeMirror.fromTextArea(
+                        document.getElementById("id_submit_solution"),
+                        {{ submit_form.submit_solution|codemirror_parameters }}
+                    );
+                </script>
+            </div>
         </form>
-        
+
         <div class="input-field col s6">
             <h4>Решение задачи</h4>
             <span style="white-space: pre-line">{{ task.solution }}</span>
         </div>
-
 
         <div class="input-field col s6">
             <h4>Тесты</h4>
@@ -57,6 +91,7 @@
                 </br>
             {% endfor %}
         </div>
+
     </div>
 
     
@@ -65,11 +100,16 @@
             $('select').formSelect();
         });
 
-        $(document).keydown(function(objEvent) {
-            if (objEvent.keyCode == 9) {  //tab pressed
-               objEvent.preventDefault(); // stops its action
+        $('#switch-mode').click(function(){
+            var el = $('div.CodeMirror');
+            if (el.hasClass('cm-s-eclipse')) {               
+                el.removeClass('cm-s-eclipse');
+                el.addClass('cm-s-material');
+            } else {
+                el.addClass('cm-s-eclipse');
+                el.removeClass('cm-s-material');
             }
-        })
+        });
     </script>
 {% endblock %}
 

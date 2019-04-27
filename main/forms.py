@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
+from djangocodemirror.fields import CodeMirrorField
 
 
 class NewUserForm(UserCreationForm):
@@ -19,9 +20,16 @@ class NewUserForm(UserCreationForm):
 
 
 class SubmitForm(forms.Form):
-    widget = forms.Textarea(attrs={'style': 'resize:none; height:50%'})
-    submit_solution = forms.CharField(label='Ваш код здесь', widget=widget)
+    submit_solution = CodeMirrorField(label='Ваш код здесь', 
+                        config_name='my_mode', required=False)
 
     class Meta:
         fields = ('code')
 
+
+class UploadCodeForm(forms.Form):
+    widget = forms.ClearableFileInput(attrs={
+            'id': 'upload_form',
+            'accept': '.py'})
+
+    file = forms.FileField(label='', required=False, widget=widget)
