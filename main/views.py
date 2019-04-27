@@ -29,6 +29,7 @@ def task_single_slug(request, single_slug, task_single_slug):
         course = Course.objects.get(pk=int(single_slug))
         task = Task.objects.get(pk=int(task_single_slug))
         tests = Test.objects.filter(task__id=task.id).order_by('title')
+        public_tests = tests.filter(public=True)
 
         if request.is_ajax():
             selected_language = request.POST['language'].lower()
@@ -54,7 +55,7 @@ def task_single_slug(request, single_slug, task_single_slug):
                 os.remove(user_code_hash)
                 return render(request=request,
                         template_name='main/includes/tests.html',
-                        context={'tests': tests,
+                        context={'tests': public_tests,
                                 'passed': passed})
             else:
                 editor_submit_form = EditorSubmitForm()
@@ -76,7 +77,7 @@ def task_single_slug(request, single_slug, task_single_slug):
                                'editor_submit_form': editor_submit_form,
                                'upload_code_form': upload_code_form,
                                'select_language_form': select_language_form,
-                               'tests': tests})
+                               'tests': public_tests})
 
     except Task.DoesNotExist:
         return HttpResponse('404 Task {} not found!'.format(task_single_slug))

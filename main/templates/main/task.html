@@ -13,7 +13,7 @@
         </nav>  
 
         <h3>{{ task.title }}</h3>
-        <p>{{ task.summary }}</p>
+        <pre>{{ task.summary }}</pre>
 
         <div class="col s2">
             <div class="switch">
@@ -71,6 +71,9 @@
         $(document).ready(function(){
             $('select').formSelect();
             $('#id_language').attr('name', 'language');
+            $('#all-forms').attr('enctype','multipart/form-data');
+            //$('div.file-path-wrapper > input').attr('name', 'file')
+
             $('#select-language-form').submit(function(e){
                 e.preventDefault();
                 var form = $(this);
@@ -98,7 +101,7 @@
                     }
                 });
             });
-
+            
             $('#all-forms').submit(function(e){
                 e.preventDefault();
                 var form = $(this);
@@ -109,8 +112,22 @@
                 
                 var language = $('select').children("option:selected").text()
                 data += '&language=' + language;
-                
+
+
+/*
+                console.log(form);
+                var form = $('#all-forms')[0];
+                console.log(form);
+                var data = new FormData(form);
+                console.log(data);
+                data.append("CustomField", "This is some extra data, testing");
+*/
                 $.ajax({
+                    type: "POST",
+                    enctype: 'multipart/form-data',
+  //                  processData: false,
+    //                contentType: false,
+      //              cache: false,
                     url: form.attr("action"),
                     method: form.attr("method"),
                     data: data,

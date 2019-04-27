@@ -41,6 +41,8 @@ class Test(models.Model):
     input = models.TextField()
     output = models.TextField()
 
+    public = models.BooleanField(default=False)
+
     task = models.ForeignKey(Task, on_delete=models.CASCADE, default=0)
 
     class Meta:
