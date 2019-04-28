@@ -44,6 +44,11 @@ def task_single_slug(request, single_slug, task_single_slug):
 
                 user_code = uploaded_code.read() if uploaded_code != None else submited_solution
 
+                try:
+                    user_code = user_code.decode('ascii')
+                except AttributeError:
+                    pass
+
                 passed, outs = testReciever.perform_testing_from_text(user_code, tests, selected_language)
 
                 Logs(name = selected_language, stdout = outs[0][0], stderr = outs[0][1]).save()
