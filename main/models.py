@@ -32,12 +32,12 @@ class Task(models.Model):
         verbose_name_plural = 'Tasks'
 
     def __str__(self):
-        return self.title
+        return self.course.title + ": " + self.title
 
 
 class Test(models.Model):
     """Таблица с тестами"""
-    title = models.CharField(max_length=title_size)
+    title = models.CharField(max_length=title_size, null=True, blank=True)
     input = models.TextField()
     output = models.TextField()
 
@@ -49,7 +49,7 @@ class Test(models.Model):
         verbose_name_plural = 'Tests'
 
     def __str__(self):
-        return self.title
+        return self.task.title + ": " + (self.title if self.title else 'Unknown')
 
 
 class Comment(models.Model):

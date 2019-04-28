@@ -2,7 +2,6 @@
 
 {% block content %}
     <div class="row">
-
         <nav class="clean">
             <div class="nav-wrapper">
                 <div class="col s12">
@@ -11,10 +10,15 @@
                 </div>
             </div>
         </nav>  
+        <div class="col s8 offset-s2">
+            <center>
+                <h3>{{ task.title }}</h3>
+                <span style="white-space: pre-wrap">{{ task.summary }}</span>
+            </center>
+        </div>
+    </div>
 
-        <h3>{{ task.title }}</h3>
-        <pre>{{ task.summary }}</pre>
-
+    <div class="row">
         <div class="col s2">
             <div class="switch">
                 <label>
@@ -28,7 +32,7 @@
         <form id="select-language-form" method="post">{% csrf_token %}</form>
         <form id="all-forms" method="post" enctype="multipart/form-data">
             {% csrf_token %}
-            <div class="col s7">
+            <div class="col s6">
                 <div class="file-field input-field">
                     <div class="btn" style="width: 200px">
                         <i class="material-icons right">attach_file</i>
@@ -46,6 +50,22 @@
                 <label>Язык</label>   
             </div>
 
+            <div class="col s1">
+                <a class="modal-trigger" href="#info-modal" style="float: right">
+                    <i class="small material-icons" style="color: black; margin-top: 25px;">info_outline</i>
+                </a>
+
+                <div id="info-modal" class="modal">
+                    <div class="modal-content">
+                    <h4>Справка</h4>
+                    <p>Примеры написания кода на разных языках</p>
+                    </div>
+                        <div class="modal-footer">
+                        <a href="#!" class="modal-close waves-effect waves-green btn-flat">Понятно</a>
+                    </div>
+                </div>
+            </div>
+
             <div id="editor" class="input-field col s12">
                 {{ editor_submit_form.as_p }}
                 <button class="btn waves-effect waves-light">
@@ -58,7 +78,9 @@
 
         <div class="input-field col s6">
             <h4>Решение задачи</h4>
-            <span style="white-space: pre-line">{{ task.solution }}</span>
+            <div style="border: 1px solid gray; padding: 5px;">
+                <span style="white-space: pre-wrap;">{{ task.solution }}</span>
+            </div>
         </div>
 
         <div id="tests" class="input-field col s6">
@@ -70,10 +92,10 @@
     <script>
         $(document).ready(function(){
             $('select').formSelect();
-            $('#id_language').attr('name', 'language');
-            $('#all-forms').attr('enctype','multipart/form-data');
-            //$('div.file-path-wrapper > input').attr('name', 'file')
+            $('.modal').modal();
 
+            $('#id_language').attr('name', 'language');
+            
             $('#select-language-form').submit(function(e){
                 e.preventDefault();
                 var form = $(this);
@@ -106,7 +128,7 @@
                 e.preventDefault();
                 var form = $(this);
 
-                var solution = foo_codemirror.getValue();
+                var solution = encodeURIComponent(foo_codemirror.getValue());
                 var re = new RegExp("solution=?.+", 'g')
                 var data = form.serialize().replace(re, "solution=" + solution)
                 

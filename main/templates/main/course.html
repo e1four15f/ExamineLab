@@ -25,11 +25,11 @@
                         </div>
                         <div class="collapsible-body">
                             <h5><b>Описание задачи</b></h5>
-                            <pre>{{ t.summary }}</pre>
+                            <span style="white-space: pre-wrap">{{ t.summary }}</span>
                             <p>
                                 <hr style="width: 30%"/>
                                 <h5><b>Сложность</b></h5>
-                                {% for i in i|rjust:t.rating %}
+                                {% for i in t.rating|rjust:t.rating %}
                                     <i class="material-icons" style="color: orange;">star</i>
                                 {% endfor %}
                             </p>

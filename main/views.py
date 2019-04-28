@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from .models import Course, Task, Test, Language
 from django.contrib.auth.forms import AuthenticationForm
