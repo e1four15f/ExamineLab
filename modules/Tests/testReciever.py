@@ -3,6 +3,8 @@ import threading
 import re
 import subprocess
 import signal
+from pathlib import Path
+
 from modules.Tests import testVerification as verification
 
 def load_from(path2load, preproc = None, dir = True):
@@ -96,7 +98,7 @@ def perform_testing_from_text(user_pr_text, tests, language, test_preproc = None
     with open(user_code_pth,'w') as user_pr:
         user_pr.write(user_pr_text)
     
-    abspath = os.path.abspath(user_code_pth)
+    #abspath = os.path.abspath(user_code_pth)
 
     if os.name == 'posix':
         launch_command = language.launch_command_linux
@@ -104,10 +106,9 @@ def perform_testing_from_text(user_pr_text, tests, language, test_preproc = None
     else:
         launch_command = language.launch_command_win
         optargs = language.optional_win
-        abspath.replace(r'\', r'/' )
 
+    abspath_wo_ext = user_code_pth.split('.')[0] #abspath.split('.')[0]
 
-    abspath_wo_ext = abspath.split('.')[0]
     launch_command = re.sub(r'<path>', abspath_wo_ext, launch_command)
     optargs = re.sub(r'<path>', abspath_wo_ext, optargs)
 
