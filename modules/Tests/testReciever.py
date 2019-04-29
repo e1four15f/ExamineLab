@@ -90,13 +90,6 @@ def perform_testing_from_text(user_pr_text, tests, language, test_preproc = None
 
     lang, launch_command, optargs = language.extention, None, None
 
-    if os.name == 'posix':
-        launch_command = language.launch_command_linux
-        optargs = language.optional_linux
-    else:
-        launch_command = language.launch_command_win
-        optargs = language.optional_win
-
     user_hash = 'program' + str(hash(user_pr_text))
     user_code_pth = user_hash + lang
 
@@ -104,8 +97,17 @@ def perform_testing_from_text(user_pr_text, tests, language, test_preproc = None
         user_pr.write(user_pr_text)
     
     abspath = os.path.abspath(user_code_pth)
-    abspath_wo_ext = abspath.split('.')[0]
 
+    if os.name == 'posix':
+        launch_command = language.launch_command_linux
+        optargs = language.optional_linux
+    else:
+        launch_command = language.launch_command_win
+        optargs = language.optional_win
+        abspath.replace(r'\', r'/' )
+
+
+    abspath_wo_ext = abspath.split('.')[0]
     launch_command = re.sub(r'<path>', abspath_wo_ext, launch_command)
     optargs = re.sub(r'<path>', abspath_wo_ext, optargs)
 
