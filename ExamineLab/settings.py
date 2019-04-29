@@ -26,7 +26,6 @@ CODEMIRROR_SETTINGS['config'] = {
     'scrollbarStyle': 'overlay',
     'keyMap': 'sublime',
     'autoCloseBrackets': '()[]{}\'\'""',
-
     'matchBrackets': True,
     'highlightSelectionMatches': True,
     'addons': [  

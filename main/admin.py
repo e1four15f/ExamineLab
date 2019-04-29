@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Course, Task, Test, Comment, Language
+from .models import *
 from django.db import models
 from django.template.defaulttags import register
 

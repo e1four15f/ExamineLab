@@ -63,18 +63,18 @@ class Comment(models.Model):
 
 class Language(models.Model):
     """Таблица с языками программировани"""
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=50, primary_key=True)
     extention = models.CharField(max_length=10)
-    
+    launch_command_linux = models.CharField(max_length=50)
+    optional_linux = models.CharField(max_length=350,default='rm <path>*')
+
+    launch_command_win = models.CharField(max_length=50)
+    optional_win = models.CharField(max_length=351,default='del /f <path>*')
     class Meta:
         verbose_name_plural = 'Languages'
 
     def __str__(self):
         return self.name
-
-
-
-
 
 
 

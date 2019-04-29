@@ -29,9 +29,11 @@
                             <p>
                                 <hr style="width: 30%"/>
                                 <h5><b>Сложность</b></h5>
-                                {% for i in t.rating|rjust:t.rating %}
-                                    <i class="material-icons" style="color: orange;">star</i>
-                                {% endfor %}
+                                {% if t.rating != 0 %}
+                                    {% for i in t.rating|rjust:t.rating %}
+                                        <i class="material-icons" style="color: orange;">star</i>
+                                    {% endfor %}
+                                {% endif %}
                             </p>
                             <a href="{{ course.id }}/{{ t.id }}" class="waves-effect waves-light btn">Приступить к выполнению!</a>
                         </div>

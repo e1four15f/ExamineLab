@@ -28,8 +28,14 @@ temp/
 *~
 *.swp
 *.swo
-*.py
+.*.sw*
 .vscode/
+*.py
+*.c
+*.cpp
+*.php
+*.java
+*.cs
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -62,7 +68,7 @@ coverage.xml
 # Django stuff:
 *.log
 local_settings.py
-# db.sqlite3
+#db.sqlite3
 
 # Flask stuff:
 instance/

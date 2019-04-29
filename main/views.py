@@ -6,7 +6,6 @@ from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
 from .forms import NewUserForm, EditorSubmitForm, UploadCodeForm, SelectLanguageForm
 
-from djangocodemirror.settings import CODEMIRROR_SETTINGS
 from modules.Tests import testReciever 
 import os
 
@@ -14,7 +13,7 @@ import os
 def single_slug(request, single_slug):
     try:
         course = Course.objects.get(pk=int(single_slug))
-        tasks = Task.objects.filter(course__id=course.id).order_by('title')
+        tasks = Task.objects.filter(course__id=course.id).order_by('rating')
         return render(request=request,
                       template_name='main/course.html',
                       context={'course': course,
@@ -28,41 +27,50 @@ def task_single_slug(request, single_slug, task_single_slug):
     try:
         course = Course.objects.get(pk=int(single_slug))
         task = Task.objects.get(pk=int(task_single_slug))
-        tests = Test.objects.filter(task__id=task.id).order_by('title')
+        tests = Test.objects.filter(task__id=task.id).order_by('-public')
         public_tests = tests.filter(public=True)
 
         if request.is_ajax():
-            selected_language = request.POST['language'].lower()
+            selected_language = request.POST['language']
             if 'solution' in request.POST:
                 editor_submit_form = EditorSubmitForm(request.POST)
                 upload_code_form = UploadCodeForm(request.POST, request.FILES)
                 select_language_form = SelectLanguageForm(request.POST)
                 
-                # type(uploaded_code) = <class 'django.core.files.uploadedfile.InMemoryUploadedFile'>
                 uploaded_code = request.FILES.get('file') 
                 submited_solution = editor_submit_form.data['solution']
 
-                test_checker = testReciever.TestReciever('python')
-                
-                user_code_hash = 'program' + str(hash(submited_solution)) + '.py'
-                with open(user_code_hash,'w') as user_pr:
-                    user_pr.write(submited_solution)
+                user_code = uploaded_code.read() if uploaded_code != None else submited_solution
 
-                passed = test_checker.perform_testing(user_code_hash, tests)
-                
+                try:
+                    user_code = user_code.decode('ascii')
+                except AttributeError:
+                    pass
+
+                passed, outs = testReciever.perform_testing_from_text(user_code, 
+                                                tests, Language.objects.get(pk=selected_language))
+
                 #if all(result for result in passed.values()):
                     #messages.success(request, 'Задание пройдено!')
-                os.remove(user_code_hash)
+                public_outs = outs[:len(public_tests)]
+                public_tests = public_tests.values()
+                for test, out in zip(public_tests, public_outs):
+                    test['result'] = out[0]
+                    test['error'] = out[1]
+
+                print(public_tests)
+                print(public_outs)
+                
                 return render(request=request,
                         template_name='main/includes/tests.html',
                         context={'tests': public_tests,
-                                'passed': passed})
+                                 'passed': passed})
             else:
                 editor_submit_form = EditorSubmitForm()
                 return render(request=request,
                         template_name='main/includes/editor.html',
                         context={'editor_submit_form': editor_submit_form,
-                                'language': selected_language})
+                                 'language': selected_language.lower()})
             
         else:
             editor_submit_form = EditorSubmitForm()
