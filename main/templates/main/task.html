@@ -101,7 +101,8 @@
                 var form = $(this);
                 var language = $('select').children("option:selected").text()
                 var re = new RegExp("language=.+", 'g')
-                var data = form.serialize().replace(re, "language=" + language)
+                var data = form.serialize()
+                data += "&language=" + language
 
                 $.ajax({
                     url: form.attr("action"),
@@ -127,32 +128,20 @@
             $('#all-forms').submit(function(e){
                 e.preventDefault();
                 var form = $(this);
-
-                var solution = encodeURIComponent(foo_codemirror.getValue());
-                var re = new RegExp("solution=?.+", 'g')
-                var data = form.serialize().replace(re, "solution=" + solution)
                 
-                var language = $('select').children("option:selected").text()
-                data += '&language=' + language;
+                var selected_option = $('select').children("option:selected");
+                var language = selected_option.text();
+                selected_option.val(language);
 
+                $('#id_solution').val(foo_codemirror.getValue());
 
-/*
-                console.log(form);
-                var form = $('#all-forms')[0];
-                console.log(form);
-                var data = new FormData(form);
-                console.log(data);
-                data.append("CustomField", "This is some extra data, testing");
-*/
                 $.ajax({
-                    type: "POST",
-                    enctype: 'multipart/form-data',
-  //                  processData: false,
-    //                contentType: false,
-      //              cache: false,
                     url: form.attr("action"),
                     method: form.attr("method"),
-                    data: data,
+                    data: new FormData(this),
+                    contentType: false,
+                    cache: false,
+                    processData: false,
                     success: function(response) {
                         $("#tests").empty().append(response);
                     }

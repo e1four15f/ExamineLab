@@ -41,8 +41,7 @@ class SelectLanguageForm(forms.Form):
     widget = forms.Select(attrs={
         'onchange': "$('#upload_form').attr('accept', this.value);\
                      $('#select-language-form').submit()",
-        'id': 'id_language',
-        'form': 'select-language-form'})
+        'id': 'id_language'})
 
     status = forms.ChoiceField(label='', choices=choices, 
                                 widget=widget, required=False)
