@@ -10,7 +10,7 @@
                             <div class="card blue hoverable">
                                 <div class="card-content white-text">
                                     <span class="card-title">{{ c.title }}</span>
-                                    <p>{{ c.summary }}</p> <!--|truncatechars:100-->
+                                    <p>{{ c.summary|truncatechars:100 }}</p>
                                 </div>
                             </div>
                         </a>
@@ -21,10 +21,27 @@
 
         <div class="col s4">
             <div class="card">
-                <div class="card-content white-text">
-                    <span class="card-title">{{ c.title }}</span>
-                    <p>{{ c.summary }}</p> <!--|truncatechars:100-->
+                <div class="card-content">
+                    <p>
+                        <label for="search">Поиск курсов</label>
+                        <input id="search" type="text" class="validate">
+                    </p>
+                    <br/>
+                    <p>
+                        <label>
+                            <input type="checkbox" class="filled-in"/>
+                            <span style="white-space: pre-wrap">Курсы, которые я прохожу</span>
+                        </label>
+                    </p>
+                    <br/>
+                    <p>
+                        <label>
+                            <input type="checkbox" class="filled-in"/>
+                            <span>Мои курсы</span>
+                        </label>
+                    </p>
                 </div>
             </div>
+        </div>
     </div>
 {% endblock %}

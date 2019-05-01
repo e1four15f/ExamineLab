@@ -14,3 +14,15 @@ admin.site.register(Language)
 @register.filter
 def get_item(dictionary, key):
     return dictionary.get(key)
+
+
+@register.filter
+def check_all(dictionary, key=''):
+    if dictionary:
+        if all(dictionary.values()):
+            return True
+        else:
+            return {'tests_count': len(dictionary),
+                    'passed_tests': sum(dictionary.values())}
+    else:
+        return False

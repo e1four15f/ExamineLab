@@ -6,13 +6,13 @@
                 {% if not passed %}
                 <div class="collapsible-header yellow">
                     <i class="tiny material-icons">cached</i>
-                {% else %}{% if passed|get_item:test.title %}
+                {% elif passed|get_item:test.id %}
                 <div class="collapsible-header green">
                     <i class="tiny material-icons">check</i>
                 {% else %}
                 <div class="collapsible-header red">
                     <i class="tiny material-icons">close</i>
-                {% endif %}{% endif %}
+                {% endif %}
                     <h7>{{ test.title }}</h7>
                 </div>
 
@@ -41,11 +41,28 @@
 
 <div class="input-field col s6">
     <h4>Ошибки</h4>
-    <textarea style="height: 200px; color: red; resize: vertical;">{% for test in tests %}{% if not test.error is None %}
+    <textarea readonly style="height: 200px; color: red; resize: vertical;">{% for test in tests %}{% if test.error%}
 Тест {{ test.id }} {{ test.title }} 
 {{ test.error }}{% endif %}{% endfor %}</textarea>
 </div>
 
+{% with passed|check_all as checks %}
+    {% if not checks is False %}
+        {% if checks.passed_tests is checks.tests_count %}
+            <script>
+                M.toast({html: 'Задание успешно пройдено!',
+                        classes: 'green',
+                        display_length: 2000})
+            </script>
+        {% else %}
+            <script>
+                M.toast({html: 'Пройдено {{ checks.passed_tests }}/{{ checks.tests_count }} тестов',
+                        classes: 'blue',
+                        display_length: 2000})
+            </script>
+        {% endif %}
+    {% endif %}
+{% endwith %}
 
 <script>
     $(document).ready(function(){

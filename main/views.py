@@ -57,9 +57,6 @@ def task_single_slug(request, single_slug, task_single_slug):
                 for test, out in zip(public_tests, public_outs):
                     test['result'] = out[0]
                     test['error'] = out[1]
-
-                print(public_tests)
-                print(public_outs)
                 
                 return render(request=request,
                         template_name='main/includes/tests.html',

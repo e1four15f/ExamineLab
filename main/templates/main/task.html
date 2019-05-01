@@ -35,7 +35,7 @@
             <div class="col s6">
                 <div class="file-field input-field">
                     <div class="btn" style="width: 200px">
-                        <i class="material-icons right">attach_file</i>
+                        <i class="material-icons right" style=" transform: rotate(30deg)">attach_file</i>
                         <span>Загрузить файл</span>
                         {{ upload_code_form }}
                     </div>
@@ -71,12 +71,14 @@
                 <button class="btn waves-effect waves-light">
                     Отправить решение<i class="material-icons right">send</i>
                 </button>
-                {% include "main/includes/editor.html" with language="python" %}
+                <div class="progress" style="width: 225px; visibility: hidden;">
+                    <div class="indeterminate"></div>
+                </div>
+                {% include "main/includes/editor.html" with language="python" %}  
             </div>
         </form>
-
         <div id="tests">{% include "main/includes/tests.html" %}</div>
-
+        
         <div class="input-field col s12">
             <h4>Решение задачи</h4>
             <button onclick="foo_codemirror.setValue($('#copy-solution').text())">Скопировать решение в редактор</button>
@@ -123,6 +125,8 @@
             });
             
             $('#all-forms').submit(function(e){
+                $('.progress').css('visibility', 'visible');
+
                 e.preventDefault();
                 var form = $(this);
                 
@@ -141,6 +145,7 @@
                     processData: false,
                     success: function(response) {
                         $("#tests").empty().append(response);
+                        $('.progress').css('visibility', 'hidden');
                     }
                 });
             });

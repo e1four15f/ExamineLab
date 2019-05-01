@@ -81,8 +81,8 @@ class TestReciever:
 
         print(f'tests         : {output}')
         for i, b in verification.verifyMultiple([stdout[0] for stdout in program_outs], output):
-            passed[tests[i].title] = b
-            print('tests: ', tests[i].title, i, passed[tests[i].title])
+            passed[tests[i].pk] = b
+            print('tests: ', tests[i].title, i, passed[tests[i].pk])
             
         return (passed, program_outs)
 
