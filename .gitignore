@@ -30,7 +30,7 @@ temp/
 *.swo
 .*.sw*
 .vscode/
-*.py
+//*.py
 *.c
 *.cpp
 *.php

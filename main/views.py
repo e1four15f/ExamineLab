@@ -5,8 +5,10 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
 from .forms import NewUserForm, EditorSubmitForm, UploadCodeForm, SelectLanguageForm
+from django.forms.models import model_to_dict
 
 from modules.Tests import testReciever 
+from modules.Containers.client import send_request
 import os
 
 
@@ -46,12 +48,14 @@ def task_single_slug(request, single_slug, task_single_slug):
                     user_code = user_code.decode('ascii')
                 except AttributeError:
                     pass
-
-                passed, outs = testReciever.perform_testing_from_text(user_code, 
-                                                tests, Language.objects.get(pk=selected_language))
-
-                #if all(result for result in passed.values()):
-                    #messages.success(request, 'Задание пройдено!')
+                
+                data = {
+                    'user_code': user_code,
+                    'tests': [t for t in tests.values()],
+                    'language': model_to_dict(Language.objects.get(pk=selected_language))
+                }
+                passed, outs = send_request(data)
+                
                 public_outs = outs[:len(public_tests)]
                 public_tests = public_tests.values()
                 for test, out in zip(public_tests, public_outs):

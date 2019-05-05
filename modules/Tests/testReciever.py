@@ -3,6 +3,7 @@ import threading
 import re
 import subprocess
 import signal
+
 from modules.Tests import testVerification as verification
 
 
@@ -61,15 +62,15 @@ class TestReciever:
     def spawn_user_proc(self, uinput)-> tuple:
 
         proc = subprocess.run(self.launch_command, input = uinput, stdout = subprocess.PIPE, stderr = subprocess.PIPE, encoding='utf-8', shell = True)
-        #print(f'in spawn_user_proc -- {proc.stdout} -- {proc.args}')
+        print(f'in spawn_user_proc -- {proc.stdout} -- {proc.args}')
         
         return (proc.stdout, proc.stderr)
 
 
     def perform_testing(self, tests, test_preproc = None, input_preproc = None):
         
-        output = [re.sub(r'\r', '', test.output) + '\n' for test in tests]
-        inputs = [re.sub(r'\r', '', test.input) for test in tests]
+        output = [re.sub(r'\r', '', test['output']) + '\n' for test in tests]
+        inputs = [re.sub(r'\r', '', test['input']) for test in tests]
       
         program_outs = [self.spawn_user_proc(pr_input)
                             for pr_input in inputs]
@@ -81,22 +82,16 @@ class TestReciever:
 
         print(f'tests         : {output}')
         for i, b in verification.verifyMultiple([stdout[0] for stdout in program_outs], output):
-            passed[tests[i].pk] = b
-            print('tests: ', tests[i].title, i, passed[tests[i].pk])
+            passed[tests[i]['id']] = b
+            print('tests: ', tests[i]['title'], i, passed[tests[i]['id']])
             
         return (passed, program_outs)
 
 
 def perform_testing_from_text(user_pr_text, tests, language, test_preproc = None, input_preproc = None):
-
-    lang, launch_command, optargs = language.extention, None, None
-
-    if os.name == 'posix':
-        launch_command = language.launch_command_linux
-        optargs = language.optional_linux
-    else:
-        launch_command = language.launch_command_win
-        optargs = language.optional_win
+    lang = language['extention']
+    launch_command = language['launch_command_linux']
+    optargs = language['optional_linux']
 
     user_hash = 'program' + str(hash(user_pr_text))
     user_code_pth = user_hash + lang
@@ -113,6 +108,5 @@ def perform_testing_from_text(user_pr_text, tests, language, test_preproc = None
     test_checker = TestReciever(launch_command)
     tests_result, outs = test_checker.perform_testing(tests, test_preproc, input_preproc)
 
-    #
     subprocess.run(optargs, shell = True)
     return (tests_result, outs)
