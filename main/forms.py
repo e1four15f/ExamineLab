@@ -33,7 +33,6 @@ class UploadCodeForm(forms.Form):
 
     file = forms.FileField(label='', required=False, widget=widget)
 
-
 class SelectLanguageForm(forms.Form):
     language = Language.objects.all()
     choices = ((lang.extention, lang.name) for lang in language)

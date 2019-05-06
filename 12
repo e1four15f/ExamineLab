@@ -1,0 +1,10 @@
+gcc -std=c99 <path>.c -o <path>.o > /dev/null && <path>.o
+python3 <path>.py
+
+	Python
+	PHP
+	JavaScript
+	Java
+	C++
+	C#
+	C
