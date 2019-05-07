@@ -1,0 +1,45 @@
+<style>
+    .help-code-field {
+        border: 1px solid #feafb4; 
+        background-color: #ffeff0;
+        padding: 10px; }
+</style>
+
+<div class="modal-content">
+    <div class="row">
+        <div class="col s12">
+            <ul class="tabs">
+                {% for l in languages %}
+                    <li class="tab"><a href="#{{ l.extention }}">{{ l.name }}</a></li>    
+                {% endfor %}
+            </ul>
+        </div>
+        {% for l in languages %}
+            <div id="{{ l.extention }}" class="col s12">
+                <div class="row">
+                    <center><h5>{{ l.name }}</h5></center>
+                    <div class="col s6">
+                        <h6>Считывание данных</h6>
+                        <div class="help-code-field">
+                            <span style="white-space: pre-wrap;">{{ l.input_help }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="col s6">
+                        <h6>Вывод данных</h6>
+                        <div class="help-code-field">
+                            <span style="white-space: pre-wrap;">{{ l.output_help }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+
+<script>
+    $(document).ready(function(){
+        $('.tabs').tabs();
+    });
+</script>

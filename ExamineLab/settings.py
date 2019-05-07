@@ -54,7 +54,7 @@ SECRET_KEY = 'n413(ma0!tl3d$x%8aeb!3)=o*+fcz3%78b!!c=dtdf3jj3ka2'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['0.0.0.0']
+ALLOWED_HOSTS = ['0.0.0.0', 'localhost']
 
 
 # Application definition

@@ -68,11 +68,9 @@ class Language(models.Model):
     launch_command_linux = models.CharField(max_length=550)
     optional_linux = models.CharField(max_length=351,default='rm <path>*')
 
-    #launch_command_win = models.CharField(max_length=550)
-    #optional_win = models.CharField(max_length=351,default='del /f <path>*')
-
     input_help = models.TextField(max_length=550, default='')
     output_help = models.TextField(max_length=550, default='')
+    
     class Meta:
         verbose_name_plural = 'Languages'
 
