@@ -127,8 +127,11 @@ def homepage(request):
 
 def courses(request):
     #Временное решение!
-    courses_attended = request.user.courses.all()
-    courses_other = Course.objects.difference(courses_attended)
+    courses_attended = []
+    courses_other = Course.objects.all()
+    if not request.user.is_anonymous:
+        courses_attended = request.user.courses.all()
+        courses_other = Course.objects.difference(courses_attended)
     return render(request=request,
                   template_name='main/courses.html',
                   context={'courses_attended': courses_attended, 'courses_other': courses_other})
