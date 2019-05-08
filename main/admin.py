@@ -1,7 +1,7 @@
 from django.contrib import admin
-from .models import *
 from django.db import models
 from django.template.defaulttags import register
+from .models import *
 
 
 admin.site.register(Course)
@@ -17,3 +17,8 @@ admin.site.register(UserCourseSpecificPermissions)
 @register.filter
 def get_item(dictionary, key):
     return dictionary.get(key)
+
+
+@register.filter
+def check_in_course(course, user_courses):
+    return course in user_courses.values()

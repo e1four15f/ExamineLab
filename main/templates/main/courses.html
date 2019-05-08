@@ -1,77 +1,56 @@
 {% extends 'main/header.html' %}
-{%block header%}
-<script type="text/javascript">
-function check(course_id, context) {
 
-        var url = "http://127.0.01:8000/course_participation_management";
-        var act = "enroll"
-        if (context.innerHTML=='Покинуть')
-            act = "unenroll"
-        var data = "course_id="+course_id+"&action="+act;
-        var other_params = {
-            credentials: 'include',
-            headers : { "content-type" : "application/x-www-form-urlencoded; charset=UTF-8"},
-            body : data,
-            method : "POST",
-            mode : "cors"};
-
-        fetch(url, other_params)
-            .then(function(response) {
-            if (response.ok) {
-                if (act=="enroll")
-                    context.innerHTML = "Покинуть"
-                else
-                    context.innerHTML = "Записаться"
-                return response;
-            } else {
-
-            }
-        }).then(function(data) {
-        }).catch(function(error) {
-            alert(error.message);
-        });
-        return true;
-
-}
-</script>
-{%endblock%}
 {% block content %}
     <div class="row">
-        {% for c in courses_attended %}
-            <div class="col s12 m6 l4">
+        {% for c in courses %}
+            <div id="course-{{ c.id }}" class="col s12 m6 l4">
                 <a href="{{ c.id }}">
                     <div class="card blue-grey darken-1 hoverable">
                         <div class="card-content white-text">
                             <span class="card-title">{{ c.title }}</span>
-                            <p>{{ c.summary }}</p> <!--|truncatechars:100-->
+                            <p>{{ c.summary }}</p>
                         </div>
                         <div class="card-action">
-                            <a href="#" onclick="check({{ c.id }}, this)">Покинуть</a>
+                            {% if c|check_in_course:user_courses %}
+                                <a href="#" onclick="check({{ c.id }}, true)">Покинуть</a>
+                            {% else %}
+                                <a href="#" onclick="check({{ c.id }}, false)">Записаться</a>
+                            {% endif %}
                         </div>
-                        <!--<div class="card-action">
-                            <a href="#">Visit</a>
-                        </div>-->
-                    </div>
-                </a>
-            </div>
-        {% endfor %}
-        {% for c in courses_other %}
-            <div class="col s12 m6 l4">
-                <a href="{{ c.id }}">
-                    <div class="card blue-grey darken-1 hoverable">
-                        <div class="card-content white-text">
-                            <span class="card-title">{{ c.title }}</span>
-                            <p>{{ c.summary }}</p> <!--|truncatechars:100-->
-                        </div>
-                        <div class="card-action">
-                            <a href="#" onclick="check({{ c.id }}, this)">Записаться</a>
-                        </div>
-                        <!--<div class="card-action">
-                            <a href="#">Visit</a>
-                        </div>-->
                     </div>
                 </a>
             </div>
         {% endfor %}
     </div>
 {% endblock %}
+
+{% block scripts %}
+    <script>
+        function check(course_id, in_course) {
+            var data = "course_id=" + course_id 
+                        + "&in_course=" + (in_course ? '1' : '')
+                        + "&csrfmiddlewaretoken={{ csrf_token }}";
+            $.ajax({
+                url: '#',
+                method: 'POST',
+                data: data,
+                success: function(response) {
+                    var link = $(`#course-${course_id} > div > div > a:nth-child(2)`);
+                    link.attr('onclick', `check(${course_id}, ${!in_course})`);
+                    if (in_course) {
+                        link.text('Записаться');
+                        M.toast({html: 'Вы покинули курс!',
+                            classes: 'red',
+                            display_length: 1000})
+                    }
+                    else {
+                        link.text('Покинуть');
+                        M.toast({html: 'Вы записались на курс!',
+                            classes: 'green',
+                            display_length: 1000})
+                    }
+                }
+            });
+        }
+    </script>
+{%endblock%}

@@ -1,44 +1,14 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, HttpResponseNotFound, HttpResponseForbidden, HttpResponseBadRequest
-from .models import Course, Task, Test, PermissionGroup, Permission
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
 from .forms import NewUserForm, SubmitForm
-from django.views.decorators.csrf import csrf_exempt
+from .models import Course, Task, Test, PermissionGroup, Permission
 
 from modules.Tests import testReciever 
 import os
 
-
-def test(request):
-    print(request.user.email)
-
-    per1,created = Permission.objects.get_or_create(name='1', description='Open')
-    print(created)
-    per2,created = Permission.objects.get_or_create(name='2', description='Close')
-    print(created)
-    per1.save()
-    per2.save()
-    pg,created = PermissionGroup.objects.get_or_create(name='pg1', description='pg1')
-    print(pg)
-    pg.permissions.add(per1)
-    pg.permissions.add(per2)
-    pg.save()
-    per1, created = Course.objects.get_or_create(title='C++', summary='C++ Course')
-    per2, created = Course.objects.get_or_create(title='Java', summary='Java Course')
-    per1.save()
-    per2.save()
-    request.user.add_permission_group(pg)
-    request.user.add_course(per1)
-    request.user.add_course(per2)
-    request.user.save()
-    print(request.user.global_permission_groups.last().permissions.all())
-    print(request.user.has_permission(permission_id_list=[2]))
-    print(request.user.get_courses(1,1))
-
-
-    return HttpResponse()
 
 def profile(request):
     if request.user.is_anonymous:
@@ -47,7 +17,7 @@ def profile(request):
                   template_name='main/profile.html',
                   context={'user': request.user})
 
-@csrf_exempt
+
 def course_participation_management(request):
     if request.user is None or request.user.is_anonymous:
         return HttpResponseForbidden()
@@ -67,6 +37,7 @@ def course_participation_management(request):
         except:
             return HttpResponseBadRequest()
 
+
 def single_slug(request, single_slug):
     try:
         course = Course.objects.get(pk=int(single_slug))
@@ -75,7 +46,6 @@ def single_slug(request, single_slug):
                       template_name='main/course.html',
                       context={'course': course,
                                'tasks': tasks})
-
     except:
         return HttpResponse('404 Course {} not found!'.format(single_slug))
 
@@ -126,15 +96,28 @@ def homepage(request):
 
 
 def courses(request):
-    #Временное решение!
-    courses_attended = []
-    courses_other = Course.objects.all()
-    if not request.user.is_anonymous:
-        courses_attended = request.user.courses.all()
-        courses_other = Course.objects.difference(courses_attended)
-    return render(request=request,
-                  template_name='main/courses.html',
-                  context={'courses_attended': courses_attended, 'courses_other': courses_other})
+    courses = Course.objects.all()
+    if request.user.is_anonymous:
+        return register(request)
+
+    if request.is_ajax():
+        course_id = request.POST['course_id']
+        in_course = bool(request.POST['in_course'])
+
+        if in_course:
+            #request.user.remove_course(Course.objects.get(id=course_id))
+            print(f'{request.user} отписался от {course_id}')
+        else:
+            #request.user.add_course(Course.objects.get(id=course_id))
+            print(f'{request.user} покинул {course_id}')
+
+        return HttpResponse()  
+
+    else:
+        return render(request=request,
+                    template_name='main/courses.html',
+                    context={'courses': courses, 
+                             'user_courses': request.user.courses})
 
 
 def register(request):

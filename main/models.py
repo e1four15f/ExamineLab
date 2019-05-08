@@ -2,8 +2,9 @@ from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.contrib.auth.models import AbstractUser
 from .managers import UserManager
-import datetime, os
-import ExamineLab.settings as settings
+
+import datetime
+
 title_size = 50
 summary_size = 400
 
@@ -113,10 +114,8 @@ class UserCourseSpecificPermissions(models.Model):
     permission = models.ForeignKey(PermissionGroup, on_delete=models.CASCADE)
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
 
+
 class UserCourseParticipation(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     date_joined = models.DateField()
-
-
-
