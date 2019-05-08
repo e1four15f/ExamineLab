@@ -2,20 +2,46 @@
 
 {% block content %}
     <div class="row">
-        {% for c in courses %}
-            <div class="col s12 m6 l4">
-                <a href="{{ c.id }}">
-                    <div class="card blue-grey darken-1 hoverable">
-                        <div class="card-content white-text">
-                            <span class="card-title">{{ c.title }}</span>
-                            <p>{{ c.summary }}</p> <!--|truncatechars:100-->
-                        </div>
-                        <!--<div class="card-action">
-                            <a href="#">Visit</a>
-                        </div>-->
+        <div class="col s8">
+            <div class="row">
+                {% for c in courses %}
+                    <div class="col s12">
+                        <a href="{{ c.id }}">
+                            <div class="card blue hoverable">
+                                <div class="card-content white-text">
+                                    <span class="card-title">{{ c.title }}</span>
+                                    <p>{{ c.summary|truncatechars:100 }}</p>
+                                </div>
+                            </div>
+                        </a>
                     </div>
-                </a>
+                {% endfor %}
             </div>
-        {% endfor %}
+        </div>
+
+        <div class="col s4">
+            <div class="card">
+                <div class="card-content">
+                    <p>
+                        <label for="search">Поиск курсов</label>
+                        <input id="search" type="text" class="validate">
+                    </p>
+                    <br/>
+                    <p>
+                        <label>
+                            <input type="checkbox" class="filled-in"/>
+                            <span style="white-space: pre-wrap">Курсы, которые я прохожу</span>
+                        </label>
+                    </p>
+                    <br/>
+                    <p>
+                        <label>
+                            <input type="checkbox" class="filled-in"/>
+                            <span>Мои курсы</span>
+                        </label>
+                    </p>
+                </div>
+            </div>
+        </div>
     </div>
 {% endblock %}

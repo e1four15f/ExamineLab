@@ -1,18 +1,21 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
-from .models import Course, Task, Test, Language, Logs
+from .models import Course, Task, Test, Language
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
-from .forms import NewUserForm, SubmitForm, UploadCodeForm
+from .forms import NewUserForm, EditorSubmitForm, UploadCodeForm, SelectLanguageForm
+from django.forms.models import model_to_dict
 
 from modules.Tests import testReciever 
+from modules.Containers.client import send_request
 import os
+
 
 def single_slug(request, single_slug):
     try:
         course = Course.objects.get(pk=int(single_slug))
-        tasks = Task.objects.filter(course__id=course.id).order_by('title')
+        tasks = Task.objects.filter(course__id=course.id).order_by('rating')
         return render(request=request,
                       template_name='main/course.html',
                       context={'course': course,
@@ -26,21 +29,18 @@ def task_single_slug(request, single_slug, task_single_slug):
     try:
         course = Course.objects.get(pk=int(single_slug))
         task = Task.objects.get(pk=int(task_single_slug))
-        tests = Test.objects.filter(task__id=task.id).order_by('title')
+        tests = Test.objects.filter(task__id=task.id).order_by('-public')
+        public_tests = tests.filter(public=True)
 
-        if request.method == 'POST':
-            submit_form = SubmitForm(request.POST)
-            upload_code_form = UploadCodeForm(request.POST, request.FILES)
-            
-            if submit_form.is_valid():
-                # type(uploaded_code) = <class 'django.core.files.uploadedfile.InMemoryUploadedFile'>
+        if request.is_ajax():
+            selected_language = request.POST['language']
+            if 'solution' in request.POST:
+                editor_submit_form = EditorSubmitForm(request.POST)
+                upload_code_form = UploadCodeForm(request.POST, request.FILES)
+                select_language_form = SelectLanguageForm(request.POST)
+                
                 uploaded_code = request.FILES.get('file') 
-                # .py .cpp .java etc
-                names = {'.c':'C', '.py': 'Python'}
-                lname = names[request.POST['language']]
-                selected_language = Language.objects.get(pk=lname)
-                submited_solution = submit_form.data['submit_solution']
-
+                submited_solution = editor_submit_form.data['solution']
 
                 user_code = uploaded_code.read() if uploaded_code != None else submited_solution
 
@@ -48,34 +48,45 @@ def task_single_slug(request, single_slug, task_single_slug):
                     user_code = user_code.decode('ascii')
                 except AttributeError:
                     pass
-
-                passed, outs = testReciever.perform_testing_from_text(user_code, tests, selected_language)
-
-                Logs(name = selected_language, stdout = outs[0][0], stderr = outs[0][1]).save()
-
+                
+                data = {
+                    'user_code': user_code,
+                    'tests': [t for t in tests.values()],
+                    'language': model_to_dict(Language.objects.get(pk=selected_language))
+                }
+                passed, outs = send_request(data)
+                
+                public_outs = outs[:len(public_tests)]
+                public_tests = public_tests.values()
+                for test, out in zip(public_tests, public_outs):
+                    test['result'] = out[0]
+                    test['error'] = out[1]
+                
                 return render(request=request,
-                      template_name='main/task.html',
-                      context={'languages': Language.objects.all(),
-                               'course': course,
-                               'task': task,
-                               'submit_form': submit_form,
-                               'upload_code_form': upload_code_form,
-                               'tests': tests,
-                               'passed': passed,
-                               'error': outs[0][1]})
-
+                        template_name='main/includes/tests.html',
+                        context={'tests': public_tests,
+                                 'passed': passed})
+            else:
+                editor_submit_form = EditorSubmitForm()
+                return render(request=request,
+                        template_name='main/includes/editor.html',
+                        context={'editor_submit_form': editor_submit_form,
+                                 'language': selected_language.lower()})
+            
         else:
-            submit_form = SubmitForm()
+            editor_submit_form = EditorSubmitForm()
             upload_code_form = UploadCodeForm()
+            select_language_form = SelectLanguageForm()
 
         return render(request=request,
                       template_name='main/task.html',
                       context={'languages': Language.objects.all(),
                                'course': course,
                                'task': task,
-                               'submit_form': submit_form,
+                               'editor_submit_form': editor_submit_form,
                                'upload_code_form': upload_code_form,
-                               'tests': tests})
+                               'select_language_form': select_language_form,
+                               'tests': public_tests})
 
     except Task.DoesNotExist:
         return HttpResponse('404 Task {} not found!'.format(task_single_slug))

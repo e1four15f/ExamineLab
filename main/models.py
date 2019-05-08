@@ -32,14 +32,16 @@ class Task(models.Model):
         verbose_name_plural = 'Tasks'
 
     def __str__(self):
-        return self.title
+        return self.course.title + ": " + self.title
 
 
 class Test(models.Model):
     """Таблица с тестами"""
-    title = models.CharField(max_length=title_size)
+    title = models.CharField(max_length=title_size, null=True, blank=True)
     input = models.TextField()
     output = models.TextField()
+
+    public = models.BooleanField(default=False)
 
     task = models.ForeignKey(Task, on_delete=models.CASCADE, default=0)
 
@@ -47,7 +49,7 @@ class Test(models.Model):
         verbose_name_plural = 'Tests'
 
     def __str__(self):
-        return self.title
+        return self.task.title + ": " + (self.title if self.title else 'Unknown')
 
 
 class Comment(models.Model):
@@ -63,38 +65,17 @@ class Language(models.Model):
     """Таблица с языками программировани"""
     name = models.CharField(max_length=50, primary_key=True)
     extention = models.CharField(max_length=10)
-    launch_command_linux = models.CharField(max_length=50)
-    optional_linux = models.CharField(max_length=350,default='rm <path>*')
+    launch_command_linux = models.CharField(max_length=550)
+    optional_linux = models.CharField(max_length=351,default='rm <path>*')
 
-    launch_command_win = models.CharField(max_length=50)
-    optional_win = models.CharField(max_length=351,default='del /f <path>*')
+    input_help = models.TextField(max_length=550, default='')
+    output_help = models.TextField(max_length=550, default='')
+    
     class Meta:
         verbose_name_plural = 'Languages'
 
     def __str__(self):
         return self.name
-
-
-class Logs(models.Model):
-    """Таблица с логами запусков программ пользователей"""
-    name = models.ForeignKey(Language, on_delete = models.CASCADE)
-    stdout = models.TextField(blank = True)    
-    stderr = models.TextField(blank = True)
-
-    class Meta:
-        verbose_name_plural = 'Logs'
-
-    def __str__(self):
-        return '{}: {} | {}'.format(self.name.name, self.stderr, self.stdout[:20])
-
-
-
-
-
-
-
-
-
 
 
 

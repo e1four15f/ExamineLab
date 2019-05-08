@@ -11,26 +11,46 @@
             </div>
         </nav>
 
-        <h2 class="card-title">{{ course.title }}</h2>
-        <p>{{ course.summary }}</p>
-        <ul class="collapsible"> <!-- expandable -->
-            {% for t in tasks %}
-                <li>
-                  <div class="collapsible-header"><i class="material-icons">filter_drama</i>{{ t.title }}</div>
-                  <div class="collapsible-body">
-                      <span>{{ t.summary }}</span>
-                      <span>{{ t.rating }}</span>
-                      <a href="{{ course.id }}/{{ t.id }}" class="waves-effect waves-light btn">Начать!</a>
-                  </div>
-                </li>
-            {% endfor %}
-        </ul>
+        <div class="col s12">
+            <h2 class="card-title">{{ course.title }}</h2>
+            <p>{{ course.summary }}</p>
+        </div>  
+        
+        <div class="col s12">
+            <ul class="collapsible" style="text-align: center;"> 
+                {% for t in tasks %}
+                    <li>
+                        <div class="collapsible-header">
+                            <h5><i class="material-icons">assignment</i></h5>
+                            <h5>{{ t.title }}</h5>
+                        </div>
+                        <div class="collapsible-body">
+                            <h5><b>Описание задачи</b></h5>
+                            <span style="white-space: pre-wrap">{{ t.summary }}</span>
+                            <p>
+                                <hr style="width: 30%"/>
+                                <h5><b>Сложность</b></h5>
+                                {% if t.rating != 0 %}
+                                    {% for i in t.rating|rjust:t.rating %}
+                                        <i class="material-icons" style="color: orange;">star</i>
+                                    {% endfor %}
+                                {% endif %}
+                            </p>
+                            <a href="{{ course.id }}/{{ t.id }}" class="waves-effect waves-light btn">Приступить к выполнению!</a>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
 
-	</div>
-	<script>
+    </div>
+    <script>
         $(document).ready(function(){
-            $(".collapsible").collapsible({accordion: true});
-            $(".collapsible").collapsible({accordion: false});
+            $(".collapsible").collapsible();
+
+            $("div.collapsible-header").css({"background-color": "#26A69A", 
+                                             "color": "white",
+                                             "padding": "0rem 0.4rem"})
         });
     </script>
 {% endblock %}

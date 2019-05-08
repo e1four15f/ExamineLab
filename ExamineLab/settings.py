@@ -14,32 +14,18 @@ from djangocodemirror.settings import *
 from djangocodemirror.helper import codemirror_settings_update
 
 
-CODEMIRROR_SETTINGS['my_mode'] = {
-    'mode': {  
-        'name': 'javascript',
-        #'version': 3,
-        #'singleLineStringErrors': False,
-    },
+CODEMIRROR_SETTINGS['config'] = {
     'tabSize': 2,
     'theme': 'eclipse',
-    #'spellcheck': True,
-    #'autocorrect': True,
     'extraKeys': {  
         'Ctrl-Q': 'toggleComment',
-        #'Ctrl-Space': 'autocomplete',
     },
     'lineNumbers': True,
     'lineWrapping': True,
     'autofocus': True,
     'scrollbarStyle': 'overlay',
-    'modes': [  
-        'javascript'
-    ],
     'keyMap': 'sublime',
     'autoCloseBrackets': '()[]{}\'\'""',
-    
-    #'styleActiveLine': True,
-
     'matchBrackets': True,
     'highlightSelectionMatches': True,
     'addons': [  
@@ -47,13 +33,7 @@ CODEMIRROR_SETTINGS['my_mode'] = {
         'CodeMirror/addon/comment/comment.js',
         'CodeMirror/addon/scroll/simplescrollbars.js',
         'CodeMirror/addon/edit/closebrackets.js',
-        'CodeMirror/keymap/sublime.js',
-        
-        
-        #'CodeMirror/addon/selection/active-line.js',
-        #'CodeMirror/addon/hint/show-hint.js',
-        #'CodeMirror/addon/hint/anyword-hint.js',
-        #'CodeMirror/addon/hint/python-hint.js',
+        'CodeMirror/keymap/sublime.js'
     ]
 }
 # TODO Добавить больше функционала 
@@ -74,7 +54,7 @@ SECRET_KEY = 'n413(ma0!tl3d$x%8aeb!3)=o*+fcz3%78b!!c=dtdf3jj3ka2'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['0.0.0.0', 'localhost']
 
 
 # Application definition
