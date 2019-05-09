@@ -18,6 +18,8 @@ from . import views
 
 app_name = 'main'
 
+handler404 = 'ExamineLab.views.handler404'
+
 urlpatterns = [
     path('', views.homepage, name='homepage'),
     path('register/', views.register, name='register'),

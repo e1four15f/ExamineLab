@@ -24,6 +24,18 @@ wheels/
 .installed.cfg
 *.egg
 MANIFEST
+temp/
+*~
+*.swp
+*.swo
+.*.sw*
+.vscode/
+//*.py
+*.c
+*.cpp
+*.php
+*.java
+*.cs
 
 # PyInstaller
 #  Usually these files are written by a python script from a template

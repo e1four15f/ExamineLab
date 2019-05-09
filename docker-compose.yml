@@ -1,0 +1,22 @@
+version: '3'
+
+services:
+  server:
+    build: 
+      context: .
+      dockerfile: ./docker/server/Dockerfile
+    command: python3 manage.py runserver 0.0.0.0:8000
+    ports:
+      - "8000:8000"
+    links:
+      - tests
+    volumes:
+      - ./:/ExamineLab/
+
+  tests:
+    build: 
+      context: .
+      dockerfile: ./docker/tests/Dockerfile
+    command: python3.7 Containers/listener.py -i examinelab_tests_1 -p 12345
+    volumes:
+      - ./modules/:/ExamineLab/modules/
