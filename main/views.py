@@ -154,3 +154,8 @@ def login_request(request):
     return render(request,
                   'main/login.html',
                   {'form': form})
+
+
+def error_404(request):
+    return render(request=request,
+                  template_name='main/404.html')

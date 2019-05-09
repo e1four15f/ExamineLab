@@ -28,4 +28,6 @@ urlpatterns = [
     path('courses/<single_slug>', views.single_slug, name='single_slug'),
     path('courses/<single_slug>/<task_single_slug>', views.task_single_slug, name='task_single_slug'),
     path('profile', views.profile, name='profile'),
+
+    path('404', views.error_404, name='404'),
 ]

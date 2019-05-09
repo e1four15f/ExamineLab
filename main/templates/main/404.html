@@ -1,0 +1,93 @@
+<head>
+    {% load static %}
+    <link href="{% static 'main/css/materialize.css' %}" rel="stylesheet">
+</head>
+    
+<style>
+    .pink-text {
+        color: pink;
+    }
+    .blue-text {
+        color: blue;
+    }
+    .gray-text {
+        color: grey;
+    }
+    .upper-text {
+        text-transform: uppercase;
+    }
+    ul {
+        list-style-type: upper-alpha;
+    }
+    h1 {
+        font-weight: 500;
+        font-size: 280px;
+        margin: 0px;
+        height: 255px;
+        margin-top: -60px;
+    }
+    h2 {
+        font-weight: 500;
+        font-size: 38px;
+    }
+    #text-under {
+        font-size: 26px;
+        margin-bottom: 55px;
+    }
+    h3 {
+        font-weight: 400;
+        font-size: 24px;
+    }
+    .container {
+        margin-top: 40px;
+        width: 1250px;
+    }
+    p {
+        font-weight: 300;
+        font-size: 18px;
+        line-height: 22px;
+    }
+    img {
+        width: 100%;
+    }
+    ul {
+        margin-left: 22px;
+        list-style-type: disc !important
+    }
+    li {
+        list-style-type: disc !important
+    }
+    span {
+        display: inline-block;
+    }
+</style>
+
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col s6">
+                <center>
+                    <h2 class="pink-text upper-text">Страница не найдена</h2>
+                    <h1 class="pink-text">404</h1>
+                    <h2 id="text-under" class="pink-text upper-text">Нету такой... Честно... Я везде поискала</h2>
+                </center>
+                <p>Простите меня....то, что Вы просили - я не могу найти. Правда-правда. Не потому, что не искала, а потому, что не нашла. Может быть то, что Вы просили найти - вообще не существует... Наверное...</p>
+                <h3>Возможно, это случилось по одной из этих причин:</h3>
+                <ul>
+                    <li class="pink-text">Вы злой человек и заставили меня искать то, чего нет... <span class="gray-text">(неправильно набрали URL)</span></li>
+                    <li class="pink-text">Ищете то, что было ещё до меня, революции и динозавров...</li>
+                    <li class="pink-text">Вас обманули злые люди и дали неработающую ссылку...</li>
+                </ul>
+                <h3>Я действительно хочу Вам помочь... Попробуйте:</h3>
+                <ul>
+                    <li class="blue-text">Вернуться назад при помощи кнопки браузера back <span class="gray-text">(это такая стрелочка загнутая влево на самом верху)</span></li>
+                    <li class="blue-text">Ещё раз написать адрес страницы, может ошиблись...</li>
+                    <li class="blue-text">Перейти на главную страницу сайта</li>
+                </ul>
+            </div>
+            <div class="col s6">
+                <img src="{% static 'main/images/anime.png' %}" alt="Аниме девка">
+            </div>
+        </div>
+    </div>
+</body>
