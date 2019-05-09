@@ -45,6 +45,7 @@ class AddTaskForm(forms.Form):
     summary_size = 400
     title = forms.CharField(max_length=title_size, required=True)
     summary = forms.CharField(max_length=summary_size)
+    # TODO Поля для добавление Test-ов
     #rating = forms.Ch
 
     class Meta:

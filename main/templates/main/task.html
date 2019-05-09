@@ -3,14 +3,7 @@
 {% block content %}
     <div class="row">
 
-        <nav class="clean">
-            <div class="nav-wrapper">
-                <div class="col s12">
-                    <a href="/courses" class="breadcrumb">Курсы</a>
-                    <a href="/courses/{{ course.id }}" class="breadcrumb">{{ course.title }}</a>
-                </div>
-            </div>
-        </nav>
+        {% include "main/includes/nav-menu-second.html" %}
 
         <h3>{{ task.title }}</h3>
         <p>{{ task.summary }}</p>
@@ -93,7 +86,13 @@
             {% endfor %}
         </div>
     </div>
+{% endblock %}
 
+{% block scripts %}
+    {% load static %}
+    <link href="{% static 'CodeMirror/theme/material.css' %}" rel="stylesheet">
+    <link href="{% static 'CodeMirror/theme/eclipse.css' %}" rel="stylesheet">
+    <link href="{% static 'CodeMirror/addon/scroll/simplescrollbars.css' %}" rel="stylesheet">
     
     <script>
         $(document).ready(function(){
@@ -112,4 +111,3 @@
         });
     </script>
 {% endblock %}
-

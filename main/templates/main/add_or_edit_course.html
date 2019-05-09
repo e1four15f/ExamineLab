@@ -1,0 +1,34 @@
+{% extends 'main/header.html' %}
+
+{% block content %}
+    <div class="row">
+        
+        {% include "main/includes/nav-menu-first.html" %}
+    
+        <center>
+            <h3>
+                {% if course %}
+                    Изменить
+                {% else %}
+                    Добавить новый
+                {% endif %}    
+                    курс {{ course.title }}
+            </h3>
+        </center>
+        
+        <div class="col s6 offset-s3">
+            <form method="POST">
+                {% csrf_token %}
+                {{ form.as_p }}
+
+                <button class="btn" type="submit">
+                    {% if course %}
+                        Изменить
+                    {% else %}
+                        Добавить
+                    {% endif %} 
+                </button>
+            </form>
+        </div>
+    </div>
+{% endblock %}

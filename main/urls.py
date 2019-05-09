@@ -25,8 +25,10 @@ urlpatterns = [
     path('logout/', views.logout_request, name='logout'),
     path('login/', views.login_request, name='login'),
     path('courses/', views.courses, name='courses'),
+    path('add_course', views.add_or_edit_course, name='add_or_edit_course'),
+    path('edit_course', views.add_or_edit_course, name='add_or_edit_course'),
     path('courses/<single_slug>', views.single_slug, name='single_slug'),
-    path('add_course', views.add_course, name='add_course'),
+    path('add_task', views.add_task, name='add_task'),
     path('courses/<single_slug>/<task_single_slug>', views.task_single_slug, name='task_single_slug'),
     path('profile', views.profile, name='profile'),
     

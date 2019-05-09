@@ -3,15 +3,14 @@
 {% block content %}
     <div class="row">
 
-        <nav class="clean">
-            <div class="nav-wrapper">
-                <div class="col s12">
-                    ><a href="/courses" class="breadcrumb">Курсы</a>
-                </div>
-            </div>
-        </nav>
+        {% include "main/includes/nav-menu-first.html" %}
 
-        <h2 class="card-title">{{ course.title }}</h2>
+        <h2 style="display: inline-block" class="card-title">{{ course.title }}</h2>
+        {% if user.is_superuser %}    
+            <a href="../add_task?course_id={{ course.id }}" style="display: inline-block">
+                <i class="material-icons green-text text-lighten-1">add_box</i>
+            </a>
+        {% endif %}
         <p>{{ course.summary }}</p>
         <ul class="collapsible"> <!-- expandable -->
             {% for t in tasks %}

@@ -3,7 +3,7 @@ from django.http import HttpResponse, HttpResponseNotFound, HttpResponseForbidde
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
-from .forms import NewUserForm, SubmitForm, AddCourseForm
+from .forms import NewUserForm, SubmitForm, AddCourseForm, AddTaskForm
 from .models import Course, Task, Test, PermissionGroup, Permission
 
 from modules.Tests import testReciever 
@@ -34,7 +34,7 @@ def single_slug(request, single_slug):
                       context={'course': course,
                                'tasks': tasks})
     except:
-        return HttpResponse('404 Course {} not found!'.format(single_slug))
+        return HttpResponseNotFound()
 
 
 def task_single_slug(request, single_slug, task_single_slug):
@@ -110,9 +110,9 @@ def courses(request):
 
 
     return render(request=request,
-                    template_name='main/courses.html',
-                    context={'courses': courses, 
-                             'user_courses': request.user.courses.all()})
+                  template_name='main/courses.html',
+                 context={'courses': courses, 
+                          'user_courses': request.user.courses.all()})
 
 
 def register(request):
@@ -168,17 +168,56 @@ def error_404(request):
                   template_name='main/404.html')
 
 
-def add_course(request):
+def add_or_edit_course(request):
     if request.user.is_superuser:
         if request.method == 'POST':
             form = AddCourseForm(request, request.POST)
-            # TODO
+            # TODO Сюда приходит и после Add и и после Edit
             pass
 
-        form = AddCourseForm()
-        return render(request=request,
-                      template_name='main/add_course.html',
-                      context={'form': form})
+        if request.path == '/add_course':
+            form = AddCourseForm()
+            return render(request=request,
+                        template_name='main/add_or_edit_course.html',
+                        context={'form': form})
+
+        elif request.path == '/edit_course':
+            try:
+                course_id = request.GET['course_id']
+                course = Course.objects.get(pk=course_id)
+            except:
+                return HttpResponseNotFound()
+
+            form = AddCourseForm(initial={'title': course.title,
+                                          'summary': course.summary})
+            
+            return render(request=request,
+                        template_name='main/add_or_edit_course.html',
+                        context={'form': form,
+                                 'course': course})
 
     return HttpResponseNotFound()
+
+
+def add_task(request):
+    try:
+        course_id = request.GET['course_id']
+        course = Course.objects.get(pk=course_id)
+    except:
+        return HttpResponseNotFound()
+
+    if request.user.is_superuser:
+        if request.method == 'POST':
+            form = AddTaskForm(request, request.POST)
+            # TODO добавить в бд
+            pass
+
+        form = AddTaskForm()
+        return render(request=request,
+                      template_name='main/add_task.html',
+                      context={'course': course,
+                               'form': form})
+
+    return HttpResponseNotFound()
+
 
