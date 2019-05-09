@@ -2,12 +2,43 @@
 
 {% block content %}
     <div class="row">
+        <div class="col s12">
+            <h3 style="display: inline-block">Курсы</h3>
+            {% if user.is_superuser %}    
+                <a href="../add_course" style="display: inline-block">
+                    <i class="material-icons green-text text-lighten-1">add_box</i>
+                </a>
+            {% endif %}
+        </div>
+
         {% for c in courses %}
             <div id="course-{{ c.id }}" class="col s12 m6 l4">
+                <div class="admin-icons">
+                    {% if user.is_superuser %}  
+                        <a href="#"><i class="material-icons yellow-text text-lighten-1">edit</i></a>
+                        <a href="#modal-delete" class="modal-trigger" 
+                            onclick="$('#course-name').text('{{ c.title }}'); $('#delete-btn').attr('onclick', 'delete_course({{ c.id }})')">
+                            <i class="material-icons red-text text-lighten-1">delete</i>
+                        </a>
+                    {% endif %}
+                </div>
+
+                <div id="modal-delete" class="modal model-choice">
+                    <div class="modal-content">
+                        <h4>Удаление</h4>
+                        <p>Вы действительно хотите удалить курс <span id="course-name"></span>?</p>
+                    </div>
+                    <div class="modal-footer">
+                        <a href="#" id="delete-btn" class="modal-close waves-effect waves-green btn-flat">Удалить</a>
+                        <a href="#" class="modal-close waves-effect waves-green btn-flat">Отмена</a>
+                    </div>
+                </div>
+
                 <a href="{{ c.id }}">
                     <div class="card blue-grey darken-1 hoverable">
                         <div class="card-content white-text">
                             <span class="card-title">{{ c.title }}</span>
+                            
                             <p>{{ c.summary }}</p>
                         </div>
                         <div class="card-action">
@@ -26,6 +57,10 @@
 
 {% block scripts %}
     <script>
+        $(document).ready(function(){
+            $('.modal').modal();
+        });
+                
         function check(course_id, in_course) {
             var data = "course_id=" + course_id 
                         + "&in_course=" + (in_course ? '1' : '')
@@ -52,5 +87,35 @@
                 }
             });
         }
+
+        function delete_course(course_id) {
+            var data = "course_id=" + course_id 
+                        + "&csrfmiddlewaretoken={{ csrf_token }}";
+            $.ajax({
+                url: '#',
+                method: 'POST',
+                data: data,
+                success: function(response) {
+                    $(`#course-${ course_id }`).remove();
+                    M.toast({html: 'Курс удалён!',
+                            classes: 'Red',
+                            display_length: 1000})
+                }
+            });
+        }
     </script>
+    <style>
+        .admin-icons {
+            height: 0px;
+            z-index: 5; 
+            position: relative;
+            float: right;
+            right: 20px;
+            top: 20px;
+        }
+        .model-choice {
+            z-index: 6;
+            width: 30%;
+        }
+    </style>
 {%endblock%}

@@ -1,0 +1,15 @@
+{% extends 'main/header.html' %}
+
+{% block content %}
+    <div class="row">
+        <center><h3>Добавить курс</h3></center>
+        <div class="col s6 offset-s3">
+            <form  method="POST">
+                {% csrf_token %}
+                {{ form.as_p }}
+
+                <button class="btn" type="submit">Добавить</button>
+            </form>
+        </div>
+    </div>
+{% endblock %}

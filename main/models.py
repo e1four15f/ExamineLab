@@ -28,7 +28,7 @@ class Task(models.Model):
     rating = models.SmallIntegerField(validators=[MaxValueValidator(5), MinValueValidator(0)], default=0)
 
     course = models.ForeignKey(Course, on_delete=models.CASCADE, default=0)
-
+    #temp
     solution = models.TextField(null=True, blank=True)
 
     class Meta:

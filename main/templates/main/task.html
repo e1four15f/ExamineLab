@@ -70,8 +70,10 @@
         </div>
 
         <div class="input-field col s6">
-            <h4>Решение задачи</h4>
-            <span style="white-space: pre-line">{{ task.solution }}</span>
+            {% if user.is_superuser %}
+                <h4>Решение задачи</h4>
+                <span style="white-space: pre-line">{{ task.solution }}</span>
+            {% endif %}
         </div>
 
         <div class="input-field col s6">

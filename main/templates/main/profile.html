@@ -56,14 +56,11 @@
     <script>
         $(document).ready(function(){
             $('.tabs').tabs();
-
+            console.log();
             $('#load-avatar-form').submit(function(e){
                 e.preventDefault();
                 var form = $(this);
-                
-                var path = '{{ user.avatar.url }}'.split('/');
-                path.pop();
-                path = path.join('/') + '/'
+                var path = "{% static 'media' %}" + '/';
 
                 var data = new FormData(this)
                 var filename = data.get('avatar')['name']

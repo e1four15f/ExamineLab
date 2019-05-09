@@ -3,7 +3,7 @@ from django.http import HttpResponse, HttpResponseNotFound, HttpResponseForbidde
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
-from .forms import NewUserForm, SubmitForm
+from .forms import NewUserForm, SubmitForm, AddCourseForm
 from .models import Course, Task, Test, PermissionGroup, Permission
 
 from modules.Tests import testReciever 
@@ -74,7 +74,7 @@ def task_single_slug(request, single_slug, task_single_slug):
                                'tests': tests})
 
     except:
-        return HttpResponse('404 Task {} not found!'.format(task_single_slug))
+        return HttpResponseNotFound()
 
 
 def homepage(request):
@@ -89,23 +89,30 @@ def courses(request):
     
     if request.is_ajax():
         course_id = request.POST['course_id']
-        in_course = bool(request.POST['in_course'])
-        selected_course = Course.objects.get(id=course_id)
-        
-        if in_course:
-            request.user.remove_course(selected_course)
-            print(f'{request.user} покинул курс {selected_course}')
-        else:
-            request.user.add_course(selected_course)
-            print(f'{request.user} записался на курс {selected_course}')
-        
-        return HttpResponse()  
 
-    else:
-        return render(request=request,
-                      template_name='main/courses.html',
-                      context={'courses': courses, 
-                               'user_courses': request.user.courses.all()})
+        if 'in_course' in request.POST: 
+            in_course = bool(request.POST['in_course'])
+            selected_course = Course.objects.get(id=course_id)
+            
+            if in_course:
+                request.user.remove_course(selected_course)
+                print(f'{request.user} покинул курс {selected_course}')
+            else:
+                request.user.add_course(selected_course)
+                print(f'{request.user} записался на курс {selected_course}')
+            
+            return HttpResponse()  
+        
+        else:
+            print(f'Удаление курса {course_id}')
+            #TODO удалить курс по id, если удалять курс, то нужно и людей из него удалять (каскадно)
+            return HttpResponse()  
+
+
+    return render(request=request,
+                    template_name='main/courses.html',
+                    context={'courses': courses, 
+                             'user_courses': request.user.courses.all()})
 
 
 def register(request):
@@ -114,13 +121,13 @@ def register(request):
         if form.is_valid():
             user = form.save()
             username = form.cleaned_data.get('email')
-            messages.success(request, 'New Account Created: {}'.format(username))
+            messages.success(request, f'Создан новый аккаунт {username}')
             login(request, user)
-            messages.info(request, 'You are now logged in as: {}'.format(username))
+            messages.info(request, f'Добро пожаловать, {username}')
             return redirect('ExamineLab:homepage')
         else:
             for msg in form.error_messages:
-                messages.error(request, '{}: {}'.format(msg, form.error_messages[msg]))
+                messages.error(request, f'{msg}: {form.error_messages[msg]}')
 
     form = NewUserForm
     return render(request=request,
@@ -130,7 +137,7 @@ def register(request):
 
 def logout_request(request):
     logout(request)
-    messages.info(request, 'Logged out successfully!')
+    messages.info(request, 'Вы вышли из системы')
     return redirect('ExamineLab:homepage')
 
 
@@ -143,12 +150,12 @@ def login_request(request):
             user = authenticate(username=username, password=password)
             if user is not None:
                 login(request, user)
-                messages.info(request, 'You are now logged in as: {}'.format(username))
+                messages.info(request, f'Добро пожаловать, {username}')
                 return redirect('ExamineLab:homepage')
             else:
-                messages.error(request, 'Invalid username or password')
+                messages.error(request, 'Неверный email или пароль')
         else:
-            messages.error(request, 'Invalid username or password')
+            messages.error(request, 'Неверный email или пароль')
 
     form = AuthenticationForm()
     return render(request,
@@ -159,3 +166,19 @@ def login_request(request):
 def error_404(request):
     return render(request=request,
                   template_name='main/404.html')
+
+
+def add_course(request):
+    if request.user.is_superuser:
+        if request.method == 'POST':
+            form = AddCourseForm(request, request.POST)
+            # TODO
+            pass
+
+        form = AddCourseForm()
+        return render(request=request,
+                      template_name='main/add_course.html',
+                      context={'form': form})
+
+    return HttpResponseNotFound()
+

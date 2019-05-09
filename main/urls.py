@@ -26,8 +26,9 @@ urlpatterns = [
     path('login/', views.login_request, name='login'),
     path('courses/', views.courses, name='courses'),
     path('courses/<single_slug>', views.single_slug, name='single_slug'),
+    path('add_course', views.add_course, name='add_course'),
     path('courses/<single_slug>/<task_single_slug>', views.task_single_slug, name='task_single_slug'),
     path('profile', views.profile, name='profile'),
-
+    
     path('404', views.error_404, name='404'),
 ]

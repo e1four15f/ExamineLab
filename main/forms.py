@@ -28,3 +28,24 @@ class SubmitForm(forms.Form):
 
     class Meta:
         fields = ('code')
+
+
+class AddCourseForm(forms.Form):
+    title_size = 50
+    summary_size = 400
+    title = forms.CharField(max_length=title_size, required=True)
+    summary = forms.CharField(max_length=summary_size)
+
+    class Meta:
+        fields = ('title', 'summary')
+
+
+class AddTaskForm(forms.Form):
+    title_size = 50
+    summary_size = 400
+    title = forms.CharField(max_length=title_size, required=True)
+    summary = forms.CharField(max_length=summary_size)
+    #rating = forms.Ch
+
+    class Meta:
+        fields = ('title', 'summary', 'rating')
