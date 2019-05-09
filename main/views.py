@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, render_to_response
 from django.http import HttpResponse
 from .models import Course, Task, Test, Language
 from django.contrib.auth.forms import AuthenticationForm
@@ -11,6 +11,11 @@ from modules.Tests import testReciever
 from modules.Containers.client import send_request
 import os
 
+def handler404(request, exception, template_name="404.html"):
+    response = render_to_response("main/404/404.html")
+    response.status_code = 404
+    return response
+
 
 def single_slug(request, single_slug):
     try:
@@ -22,7 +27,7 @@ def single_slug(request, single_slug):
                                'tasks': tasks})
 
     except Course.DoesNotExist:
-        return HttpResponse('404 Course {} not found!'.format(single_slug))
+        return handler404(request, Course.DoesNotExist)#HttpResponse('404 Course {} not found!'.format(single_slug))
 
 
 def task_single_slug(request, single_slug, task_single_slug):
