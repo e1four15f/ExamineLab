@@ -7,7 +7,6 @@ from .models import *
 admin.site.register(Course)
 admin.site.register(Task)
 admin.site.register(Test)
-admin.site.register(Comment)
 admin.site.register(User)
 admin.site.register(PermissionGroup)
 admin.site.register(Permission)
@@ -21,4 +20,4 @@ def get_item(dictionary, key):
 
 @register.filter
 def check_in_course(course, user_courses):
-    return course in user_courses.values()
+    return course in user_courses

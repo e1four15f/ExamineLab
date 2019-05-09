@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, render_to_response
 from django.http import HttpResponse, HttpResponseNotFound, HttpResponseForbidden, HttpResponseBadRequest
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login, logout, authenticate
@@ -13,29 +13,16 @@ import os
 def profile(request):
     if request.user.is_anonymous:
         return HttpResponseNotFound()
-    return render(request=request,
-                  template_name='main/profile.html',
-                  context={'user': request.user})
 
-
-def course_participation_management(request):
-    if request.user is None or request.user.is_anonymous:
-        return HttpResponseForbidden()
-    elif 'course_id' not in request.POST or 'action' not in request.POST:
-        print(request.body)
-        return HttpResponseBadRequest()
+    if request.is_ajax():
+        image = request.FILES.get('avatar')
+        # TODO Сохраняет локально, а не в бд
+        request.user.avatar.save(image.name, image)
+        return HttpResponse()
     else:
-        try:
-            course = Course.objects.get(pk=int(request.POST['course_id']))
-            if request.POST['action'] == 'enroll':
-                request.user.add_course(course)
-                request.user.save()
-                return HttpResponse()
-            else:
-                request.user.remove_course(course)
-                return HttpResponse()
-        except:
-            return HttpResponseBadRequest()
+        return render(request=request,
+                    template_name='main/profile.html',
+                    context={'user': request.user})
 
 
 def single_slug(request, single_slug):
@@ -99,25 +86,26 @@ def courses(request):
     courses = Course.objects.all()
     if request.user.is_anonymous:
         return register(request)
-
+    
     if request.is_ajax():
         course_id = request.POST['course_id']
         in_course = bool(request.POST['in_course'])
-
+        selected_course = Course.objects.get(id=course_id)
+        
         if in_course:
-            #request.user.remove_course(Course.objects.get(id=course_id))
-            print(f'{request.user} отписался от {course_id}')
+            request.user.remove_course(selected_course)
+            print(f'{request.user} покинул курс {selected_course}')
         else:
-            #request.user.add_course(Course.objects.get(id=course_id))
-            print(f'{request.user} покинул {course_id}')
-
+            request.user.add_course(selected_course)
+            print(f'{request.user} записался на курс {selected_course}')
+        
         return HttpResponse()  
 
     else:
         return render(request=request,
-                    template_name='main/courses.html',
-                    context={'courses': courses, 
-                             'user_courses': request.user.courses})
+                      template_name='main/courses.html',
+                      context={'courses': courses, 
+                               'user_courses': request.user.courses.all()})
 
 
 def register(request):
@@ -129,7 +117,7 @@ def register(request):
             messages.success(request, 'New Account Created: {}'.format(username))
             login(request, user)
             messages.info(request, 'You are now logged in as: {}'.format(username))
-            return redirect('main:homepage')
+            return redirect('ExamineLab:homepage')
         else:
             for msg in form.error_messages:
                 messages.error(request, '{}: {}'.format(msg, form.error_messages[msg]))
@@ -143,7 +131,7 @@ def register(request):
 def logout_request(request):
     logout(request)
     messages.info(request, 'Logged out successfully!')
-    return redirect('main:homepage')
+    return redirect('ExamineLab:homepage')
 
 
 def login_request(request):
@@ -156,7 +144,7 @@ def login_request(request):
             if user is not None:
                 login(request, user)
                 messages.info(request, 'You are now logged in as: {}'.format(username))
-                return redirect('main:homepage')
+                return redirect('ExamineLab:homepage')
             else:
                 messages.error(request, 'Invalid username or password')
         else:

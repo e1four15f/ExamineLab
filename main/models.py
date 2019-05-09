@@ -53,15 +53,6 @@ class Test(models.Model):
         return self.title
 
 
-class Comment(models.Model):
-    """Таблица с комментариями
-    TODO сделать динамическое заполнение таблицы через взаимодействие с пользователем"""
-    summary = models.TextField(max_length=summary_size)
-
-    class Meta:
-        verbose_name_plural = 'Comments'
-
-
 class Permission(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=20)
