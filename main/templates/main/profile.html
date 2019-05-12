@@ -4,10 +4,12 @@
 {% block content %}
     <div class="row">
         <div class="col s4 center-align">
+            <h5>{{ user.first_name }} {{ user.last_name }}</h5>
             <form id="load-avatar-form" method="post" enctype="multipart/form-data" onchange="$(this).submit()">
                 {% csrf_token %}
                 <input id="load-avatar" type="file" name="avatar" accept="image/*" style="visibility: hidden"/> 
                 <a href="#">
+                    <!-- TODO Аватарки сжимаются под размер -->
                     <img onclick="$('#load-avatar').trigger('click')" class="responsive-img"
                     {% if user.avatar %}
                         src="{{ user.avatar.url }}">
@@ -37,6 +39,15 @@
                                     <div class="card-content white-text">
                                         <span class="card-title">{{ c.title }}</span>
                                         <p>{{ c.summary|truncatechars:100 }}</p>
+                                        <br>
+                                        {% with c.id|get_course_progress:user.completed_tasks.all as progress %}
+                                            <p>Прогресс: {{ progress.completed }}/{{ progress.all }}</p> 
+                                            <div class="progress">
+                                                <div class="determinate" 
+                                                    style="width: {{ progress.percents }}%">
+                                                </div>
+                                            </div>
+                                        {% endwith %}
                                     </div>
                                 </div>
                             </a>
@@ -44,8 +55,19 @@
                     {% endfor %}
                 </div>
             
-                <div id="completed" class="col s6 offset-s6">
-                    <!--TODO-->
+                <div id="completed" class="col s12">
+                    {% for c in user.completed_courses.all %}
+                        <div class="col s6">
+                            <a href="/courses/{{ c.id }}">
+                                <div class="card blue-grey darken-1 hoverable">
+                                    <div class="card-content white-text">
+                                        <span class="card-title">{{ c.title }}</span>
+                                        <p>{{ c.summary|truncatechars:100 }}</p>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    {% endfor %}
                 </div>
             </div>
         </div>
@@ -56,7 +78,7 @@
     <script>
         $(document).ready(function(){
             $('.tabs').tabs();
-            console.log();
+
             $('#load-avatar-form').submit(function(e){
                 e.preventDefault();
                 var form = $(this);

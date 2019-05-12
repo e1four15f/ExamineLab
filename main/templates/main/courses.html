@@ -11,50 +11,8 @@
             {% endif %}
         </div>
 
-        <div class="col s8">
-            {% for c in courses %}
-            <div id="course-{{ c.id }}" class="col s12 m6 l6">
-                    <div class="admin-icons">
-                        {% if user.is_superuser %}  
-                            <a href="../edit_course?course_id={{ c.id }}">
-                                <i class="material-icons yellow-text text-lighten-1">edit</i>
-                            </a>
-                            <a href="#modal-delete" class="modal-trigger" 
-                                onclick="$('#course-name').text('{{ c.title }}'); $('#delete-btn').attr('onclick', 'delete_course({{ c.id }})')">
-                                <i class="material-icons red-text text-lighten-1">delete</i>
-                            </a>
-                        {% endif %}
-                    </div>
-
-                    <div id="modal-delete" class="modal model-choice">
-                        <div class="modal-content">
-                            <h4>Удаление</h4>
-                            <p>Вы действительно хотите удалить курс <span id="course-name"></span>?</p>
-                        </div>
-                        <div class="modal-footer">
-                            <a href="#" id="delete-btn" class="modal-close waves-effect waves-green btn-flat">Удалить</a>
-                            <a href="#" class="modal-close waves-effect waves-green btn-flat">Отмена</a>
-                        </div>
-                    </div>
-
-                    <a href="{{ c.id }}">
-                        <div class="card blue-grey darken-1 hoverable">
-                            <div class="card-content white-text">
-                                <span class="card-title">{{ c.title }}</span>
-                                
-                                <p>{{ c.summary|truncatechars:100 }}</p>
-                            </div>
-                            <div class="card-action">
-                                {% if c|check_in_course:user_courses %}
-                                    <a href="#" onclick="check({{ c.id }}, true)">Покинуть</a>
-                                {% else %}
-                                    <a href="#" onclick="check({{ c.id }}, false)">Записаться</a>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </a>
-                </div>
-            {% endfor %}
+        <div id="courses-panel" class="col s8">
+            {% include "main/includes/courses-panel.html" %}
         </div>
 
         <div class="col s4">
@@ -62,19 +20,29 @@
                 <div class="card-content">
                     <p>
                         <label for="search">Поиск курсов</label>
-                        <input id="search" type="text" class="validate">
+                        <input id="search" type="text" class="validate" onkeyup="checkbox_filters()">
                     </p>
                     <br/>
                     <p>
                         <label>
-                            <input type="checkbox" class="filled-in"/>
+                            <input id="completed_courses" type="checkbox" class="filled-in" 
+                                    onchange="checkbox_filters()"/>
+                            <span>Пройденные курсы</span>
+                        </label>
+                    </p>
+                    <br/>
+                    <p>
+                        <label>
+                            <input id="enrolled_courses" type="checkbox" class="filled-in"
+                                    onchange="checkbox_filters()"/>
                             <span style="white-space: pre-wrap">Курсы, которые я прохожу</span>
                         </label>
                     </p>
                     <br/>
                     <p>
                         <label>
-                            <input type="checkbox" class="filled-in"/>
+                            <input id="my_courses" type="checkbox" class="filled-in"
+                                    onchange="checkbox_filters()"/>
                             <span>Мои курсы</span>
                         </label>
                     </p>
@@ -106,6 +74,7 @@
                         M.toast({html: 'Вы покинули курс!',
                             classes: 'red',
                             display_length: 1000})
+                        $('#courses-panel').empty().append(response);
                     }
                     else {
                         link.text('Покинуть');
@@ -132,6 +101,22 @@
                 }
             });
         }
+
+        function checkbox_filters() {
+            var data = "filters=&csrfmiddlewaretoken={{ csrf_token }}&completed_courses=" 
+                        + ($("#completed_courses").is(":checked") ? '1' : '') 
+                        + "&enrolled_courses=" 
+                        + ($("#enrolled_courses").is(":checked") ? '1' : '')
+                        + "&search=" + $("#search").val();
+            $.ajax({
+                url: '#',
+                method: 'POST',
+                data: data,
+                success: function(response) {
+                    $('#courses-panel').empty().append(response);
+                }
+            });
+        }
     </script>
 
     <style>
@@ -146,6 +131,9 @@
         .model-choice {
             z-index: 6;
             width: 30%;
+        }
+        label > span {
+            color: black;
         }
     </style>
 {% endblock %}

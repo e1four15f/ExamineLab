@@ -6,9 +6,9 @@ from .models import User, Language, title_size, summary_size
 
 
 class NewUserForm(UserCreationForm):
-    name = forms.CharField(max_length=50, required=False,
+    first_name = forms.CharField(max_length=50, required=False,
                                 label='Имя')
-    surname = forms.CharField(max_length=50, required=False, 
+    last_name = forms.CharField(max_length=50, required=False, 
                                 label='Фамилия')
     email = forms.EmailField(required=True)
     password1 = forms.CharField(
@@ -30,12 +30,11 @@ class NewUserForm(UserCreationForm):
     
     class Meta:
         model = User
-        fields = ('name', 'surname', 'email', 'password1', 'password2')
+        fields = ('first_name', 'last_name', 'email', 'password1', 'password2')
         
     def save(self, commit=True):
         user = super(NewUserForm, self).save(commit=False)
         user.username = self.cleaned_data['email']
-        #user.email = self.cleaned_data['email']
         if commit:
             user.save()
         return user

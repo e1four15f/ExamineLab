@@ -1,0 +1,48 @@
+{% for c in courses %}
+    <div id="course-{{ c.id }}" class="col s12 m6 l6">
+        <div class="admin-icons">
+            {% if user.is_superuser %}  
+                <a href="../edit_course?course_id={{ c.id }}">
+                    <i class="material-icons yellow-text text-lighten-1">edit</i>
+                </a>
+                <a href="#modal-delete" class="modal-trigger" 
+                    onclick="$('#course-name').text('{{ c.title }}'); $('#delete-btn').attr('onclick', 'delete_course({{ c.id }})')">
+                    <i class="material-icons red-text text-lighten-1">delete</i>
+                </a>
+            {% endif %}
+        </div>
+
+        <div id="modal-delete" class="modal model-choice">
+            <div class="modal-content">
+                <h4>Удаление</h4>
+                <p>Вы действительно хотите удалить курс <span id="course-name"></span>?</p>
+            </div>
+            <div class="modal-footer">
+                <a href="#" id="delete-btn" class="modal-close waves-effect waves-green btn-flat">Удалить</a>
+                <a href="#" class="modal-close waves-effect waves-green btn-flat">Отмена</a>
+            </div>
+        </div>
+
+        <a href="{{ c.id }}">
+            <div class="card hoverable 
+                {% if c.id in completed_courses %}
+                    green
+                {% else %}
+                    blue-grey
+                {% endif %}
+                ">
+                <div class="card-content white-text">
+                    <span class="card-title">{{ c.title }}</span>
+                    <p>{{ c.summary|truncatechars:100 }}</p>
+                </div>
+                <div class="card-action">
+                    {% if c in user_courses %}
+                        <a href="#" onclick="check({{ c.id }}, true)">Покинуть</a>
+                    {% else %}
+                        <a href="#" onclick="check({{ c.id }}, false)">Записаться</a>
+                    {% endif %}
+                </div>
+            </div>
+        </a>
+    </div>
+{% endfor %}

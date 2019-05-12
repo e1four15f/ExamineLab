@@ -66,14 +66,14 @@ class Test(models.Model):
 
 
 class User(AbstractUser):
-    name = models.CharField(max_length=40, null=True, blank=True)
-    surname = models.CharField(max_length=40, null=True, blank=True)
     email = models.CharField(max_length=40, primary_key=True)
     #global_permission_groups = models.ManyToManyField(PermissionGroup)
     courses = models.ManyToManyField(Course, through='UserCourseParticipation')
-    avatar = models.ImageField(null=True)
+    completed_tasks = models.ManyToManyField(Task, blank=True, related_name='completed_tasks')
+    completed_courses = models.ManyToManyField(Course, blank=True, related_name='completed_courses')
+    avatar = models.ImageField(null=True, blank=True)
     USERNAME_FIELD = 'email'
-    objects = UserManager()
+    #objects = UserManager()
     REQUIRED_FIELDS = []
 
     #def has_permission_group(self, permission_group, course=None):
@@ -99,7 +99,7 @@ class User(AbstractUser):
         self.courses.remove(course)
 
     def __str__(self):
-        return email
+        return f'{self.email} {self.first_name} {self.last_name}'
 
         
 class Language(models.Model):

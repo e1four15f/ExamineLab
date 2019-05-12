@@ -18,12 +18,7 @@ admin.site.register(Language)
 def get_item(dictionary, key):
     return dictionary.get(key)
 
-
-@register.filter
-def check_in_course(course, user_courses):
-    return course in user_courses
-
-
+    
 @register.filter
 def check_all(dictionary, key=''):
     if dictionary:
@@ -34,3 +29,21 @@ def check_all(dictionary, key=''):
                     'passed_tests': sum(dictionary.values())}
     else:
         return False
+
+
+@register.filter
+def get_course_progress(course_id, completed_tasks):
+    course_tasks = Task.objects.filter(course=course_id)
+    completed_tasks = completed_tasks.filter(course=course_id)
+
+    try:
+        percent = len(completed_tasks)/len(course_tasks)*100
+    except ZeroDivisionError:
+        percent = 100
+    
+    data = {
+        'percents': percent,
+        'all': len(course_tasks),
+        'completed': len(completed_tasks)
+    }
+    return data

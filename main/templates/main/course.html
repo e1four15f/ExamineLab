@@ -14,20 +14,52 @@
             {% endif %}
         </div>
         <div class="col s2">
-            {% if not course|check_in_course:user_courses %}
+            {% if not course in user_courses %}
                 <a id="enroll-btn" href="#" onclick="enroll()" class="waves-effect waves-light btn">Записаться</a>
                 <p id="in-course" style="display: none;">Вы участвуете!</p>
             {% else %}
                 <p id="in-course">Вы участвуете!</p>
             {% endif %}
         </div>
-        
+
         <div class="col s12">
             <p>{{ course.summary }}</p>
+        </div>
+        
+        <div class="col s12">    
             <ul class="collapsible" style="text-align: center;"> 
                 {% for t in tasks %}
-                    <li>
-                        <div class="collapsible-header">
+                    <li id="task-{{ t.id }}">
+                        <div class="admin-icons">
+                            {% if user.is_superuser %}  
+                                <a href="../edit_task?task_id={{ t.id }}">
+                                    <i class="material-icons yellow-text text-lighten-1">edit</i>
+                                </a>
+                                <a href="#modal-delete" class="modal-trigger" 
+                                    onclick="$('#task-name').text('{{ t.title }}'); $('#delete-btn').attr('onclick', 'delete_task({{ t.id }})')">
+                                    <i class="material-icons red-text text-lighten-1">delete</i>
+                                </a>
+                            {% endif %}
+                        </div>
+
+                        <div id="modal-delete" class="modal model-choice">
+                            <div class="modal-content">
+                                <h4>Удаление</h4>
+                                <p>Вы действительно хотите удалить задание <span id="task-name"></span>?</p>
+                            </div>
+                            <div class="modal-footer">
+                                <a href="#" id="delete-btn" class="modal-close waves-effect waves-green btn-flat">Удалить</a>
+                                <a href="#" class="modal-close waves-effect waves-green btn-flat">Отмена</a>
+                            </div>
+                        </div>
+            
+                        <div class="collapsible-header  
+                            {% if t.id in completed_tasks %}
+                                green
+                            {% else %}
+                                blue-grey
+                            {% endif %}
+                            ">
                             <h5><i class="material-icons">assignment</i></h5>
                             <h5>{{ t.title }}</h5>
                         </div>
@@ -44,7 +76,7 @@
                                 {% endif %}
                             </p>
                             <a href="{{ course.id }}/{{ t.id }}" class="waves-effect waves-light btn
-                            {% if not course|check_in_course:user_courses %}
+                            {% if not course in user_courses %}
                                 disabled
                             {% endif %}
                             ">Приступить к выполнению!</a>
@@ -60,10 +92,7 @@
     <script>
         $(document).ready(function(){
             $(".collapsible").collapsible();
-
-            $("div.collapsible-header").css({"background-color": "#26A69A", 
-                                             "color": "white",
-                                             "padding": "0rem 0.4rem"})
+            $('.modal').modal();
         });
 
         function enroll() {
@@ -82,9 +111,29 @@
                 }
             });
         }
+
+        function delete_task(task_id) {
+            var data = "task_id=" + task_id 
+                        + "&csrfmiddlewaretoken={{ csrf_token }}";
+            $.ajax({
+                url: '#',
+                method: 'POST',
+                data: data,
+                success: function(response) {
+                    $(`#task-${ task_id }`).remove();
+                    M.toast({html: 'Задание удалено!',
+                            classes: 'Red',
+                            display_length: 1000})
+                }
+            });
+        }
     </script>
     
     <style>
+        div.collapsible-header {
+            color: white;
+            padding: 0rem 0.4rem;
+        }
         #enroll-btn {
             margin-top: 45px;
             float: right;
@@ -95,6 +144,18 @@
             margin-right: 25px;
             float: right;
             text-align: center;
+        }
+        .admin-icons {
+            height: 0px;
+            z-index: 5; 
+            position: relative;
+            float: right;
+            right: 20px;
+            top: 15px;
+        }
+        .model-choice {
+            z-index: 6;
+            width: 30%;
         }
     </style>
 {% endblock %}
