@@ -10,30 +10,14 @@
         </a>
         
         <ul id="nav-mobile" class="right hide-on-med-and-down">
-            {% if user.is_authenticated %}
-                {% if user.is_superuser %}
-                    <li><a href="/admin">Администрирование</a></li>
-                {% else%}
-                    <li><a href="/profile">{{ user.username }}</a></li>
-                {% endif %}
-                <li><a href="/logout">Выйти</a></li>
-            {% else %}
-                <li><a href="/register">Регистрация</a></li>
-                <li><a href="/login">Войти</a></li>
-            {% endif %}
+            {% include "main/includes/navbar-buttons.html" %}
         </ul>
     </div>
 </nav>
 
 <ul class="sidenav" id="mobile-demo">
     <center><i class="material-icons" style="font-size: 30px">account_box</i></center>
-    {% if user.is_authenticated %}
-        <li><a href="/profile">{{ user.username }}</a></li>
-        <li><a href="/logout">Выйти</a></li>
-    {% else %}
-        <li><a href="/login">Войти</a></li>
-        <li><a href="/register">Регистрация</a></li>
-    {% endif %}
+    {% include "main/includes/navbar-buttons.html" %}
 </ul>
 
 <script>
