@@ -41,7 +41,7 @@
                         <div class="card-content white-text">
                             <span class="card-title">{{ c.title }}</span>
                             
-                            <p>{{ c.summary }}</p>
+                            <p>{{ c.summary|truncatechars:100 }}</p>
                         </div>
                         <div class="card-action">
                             {% if c|check_in_course:user_courses %}

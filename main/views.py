@@ -105,14 +105,16 @@ def courses(request):
         
         else:
             print(f'Удаление курса {course_id}')
-            #TODO удалить курс по id, если удалять курс, то нужно и людей из него удалять (каскадно)
+            #TODO Проверить не остаётся ли после удаление лишний мусор
+            selected_course = Course.objects.get(id=course_id)
+            selected_course.delete()
             return HttpResponse()  
 
 
     return render(request=request,
                   template_name='main/courses.html',
-                 context={'courses': courses, 
-                          'user_courses': request.user.courses.all()})
+                  context={'courses': courses, 
+                           'user_courses': request.user.courses.all()})
 
 
 def register(request):
@@ -170,16 +172,33 @@ def error_404(request):
 
 def add_or_edit_course(request):
     if request.user.is_superuser:
+        course_id = None
         if request.method == 'POST':
             form = AddCourseForm(request, request.POST)
-            # TODO Сюда приходит и после Add и и после Edit
-            pass
+            title = request.POST['title']
+            summary = request.POST['summary']
+            
+            if request.path == '/add_course':
+                new_course = Course(title=title, summary=summary)
+                new_course.save()
+                messages.success(request, f'Добавлен новый курс {title}')
+                print(f'Добавлен новый курс {title}')
+            elif request.path == '/edit_course':
+                course_id = request.GET['course_id']
+                selected_course = Course.objects.get(pk=course_id)
+                selected_course.title = title
+                selected_course.summary = summary
+                selected_course.save()
+                messages.info(request, f'Обновлён курс {title}')
+                print(f'Обновлён курс {title}')
+            
+            return redirect('ExamineLab:courses')
 
         if request.path == '/add_course':
             form = AddCourseForm()
             return render(request=request,
-                        template_name='main/add_or_edit_course.html',
-                        context={'form': form})
+                          template_name='main/add_or_edit_course.html',
+                          context={'form': form})
 
         elif request.path == '/edit_course':
             try:
@@ -192,9 +211,9 @@ def add_or_edit_course(request):
                                           'summary': course.summary})
             
             return render(request=request,
-                        template_name='main/add_or_edit_course.html',
-                        context={'form': form,
-                                 'course': course})
+                          template_name='main/add_or_edit_course.html',
+                          context={'form': form,
+                                   'course': course})
 
     return HttpResponseNotFound()
 
