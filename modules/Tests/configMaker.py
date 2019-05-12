@@ -1,6 +1,8 @@
 import os
 import datetime
 import re 
+
+
 def makeConfig(filesDir, language, task, filetype = None):
     '''
     :filesDir: -- directory with files
@@ -16,6 +18,7 @@ def makeConfig(filesDir, language, task, filetype = None):
                     continue
             key = str(hash(path)) + str(hash(filename))
             configDict[key] = os.path.abspath(path + '/' + filename)
+            
     with open(language + str(task) + str(datetime.datetime.now()), 'w') as config:
         config.write(repr(configDict))
         config.close()

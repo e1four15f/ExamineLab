@@ -3,7 +3,9 @@ import threading
 import re
 import subprocess
 import signal
+
 from modules.Tests import testVerification as verification
+
 
 def load_from(path2load, preproc = None, dir = True):
     '''
@@ -21,7 +23,7 @@ def load_from(path2load, preproc = None, dir = True):
                 yield file.read()
             return
     
-    for path, directory, files in os.walk(path2load):
+    for path, _, files in os.walk(path2load):
         for filename in files:
             with open(path + '/' +filename, 'r') as testFile:
                 if preproc == None:
@@ -36,16 +38,16 @@ def load_file(path2load, preproc = None):
 class TestReciever:
 
     '''
-    :launchCommand: -- command to perform execution
+    :launch_command: -- command to perform execution
     '''
 
 
-    def __init__(self, launchCommand = './'):
+    def __init__(self, launch_command = './'):
         '''
-        Loads *pathMapping* with config file interpreted as dict and initializes launchCommand.
+        Loads *pathMapping* with config file interpreted as dict and initializes launch_command.
         '''
 
-        self.launchCommand = launchCommand
+        self.launch_command = launch_command
 
     def get_test_by_path(self, path, preproc = None):
         '''
@@ -57,36 +59,54 @@ class TestReciever:
         for path in paths:
             yield self.get_test_by_path(path, preproc)
 
-    def spawn_user_proc(self, user_pr_path, uinput, args = None):
-        if args != None and not issubclass(type(args), list):
-            raise TypeError(f':args: must be a list of commandline arguments, not {type(args)}')
+    def spawn_user_proc(self, uinput)-> tuple:
 
-        subproc_args = None
-        if args == None:
-            subproc_args = [self.launchCommand] + [os.path.abspath(user_pr_path)]
-        else:
-            subproc_args = [self.launchCommand] + args + [os.path.abspath(user_pr_path)]
-            
-        proc = subprocess.run(subproc_args, input = uinput, stdout = subprocess.PIPE, encoding='utf-8')
-        #print(f'in spawn_user_proc -- {proc.stdout} -- {proc.args}')
-        print(subproc_args)
+        proc = subprocess.run(self.launch_command, input = uinput, stdout = subprocess.PIPE, stderr = subprocess.PIPE, encoding='utf-8', shell = True)
+        print(f'in spawn_user_proc -- {proc.stdout} -- {proc.args}')
         
-        return proc.stdout
+        return (proc.stdout, proc.stderr)
 
 
-    def perform_testing(self, user_pr_path, tests, test_preproc = None, input_preproc = None, args = None):
+    def perform_testing(self, tests, test_preproc = None, input_preproc = None):
         
-        output = [re.sub(r'\r', '', test.output) + '\n' for test in tests]
-        inputs = [re.sub(r'\r', '', test.input) for test in tests]
+        output = [re.sub(r'\r', '', test['output']) + '\n' for test in tests]
+        inputs = [re.sub(r'\r', '', test['input']) for test in tests]
       
-        program_outs = [self.spawn_user_proc(user_pr_path, pr_input, args)
+        program_outs = [self.spawn_user_proc(pr_input)
                             for pr_input in inputs]
             
         
         passed = {}
-        print(f'program outs: {program_outs}')
-        for i, b in verification.verifyMultiple(program_outs, output):
-            passed[tests[i].title] = b
-            print('tests: ', tests[i].title, i, passed[tests[i].title])
+        print(f'program inputs: {inputs}')
+        print(f'program outs  : {program_outs}')
+
+        print(f'tests         : {output}')
+        for i, b in verification.verifyMultiple([stdout[0] for stdout in program_outs], output):
+            passed[tests[i]['id']] = b
+            print('tests: ', tests[i]['title'], i, passed[tests[i]['id']])
             
-        return passed
+        return (passed, program_outs)
+
+
+def perform_testing_from_text(user_pr_text, tests, language, test_preproc = None, input_preproc = None):
+    lang = language['extention']
+    launch_command = language['launch_command_linux']
+    optargs = language['optional_linux']
+
+    user_hash = 'program' + str(hash(user_pr_text))
+    user_code_pth = user_hash + lang
+
+    with open(user_code_pth,'w') as user_pr:
+        user_pr.write(user_pr_text)
+    
+    abspath = os.path.abspath(user_code_pth)
+    abspath_wo_ext = abspath.split('.')[0]
+
+    launch_command = re.sub(r'<path>', abspath_wo_ext, launch_command)
+    optargs = re.sub(r'<path>', abspath_wo_ext, optargs)
+
+    test_checker = TestReciever(launch_command)
+    tests_result, outs = test_checker.perform_testing(tests, test_preproc, input_preproc)
+
+    subprocess.run(optargs, shell = True)
+    return (tests_result, outs)

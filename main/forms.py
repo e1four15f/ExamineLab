@@ -1,9 +1,8 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import password_validation
-from .models import User
 from djangocodemirror.fields import CodeMirrorField
-
+from .models import User, Language, title_size, summary_size
 
 
 class NewUserForm(UserCreationForm):
@@ -42,18 +41,7 @@ class NewUserForm(UserCreationForm):
         return user
 
 
-class SubmitForm(forms.Form):
-    submit_solution = CodeMirrorField(label='Ваш код здесь',
-                        config_name='my_mode', required=False)
-
-    class Meta:
-        fields = ('code')
-
-
 class AddCourseForm(forms.Form):
-    # TODO получать поля из бд
-    title_size = 50
-    summary_size = 400
     title = forms.CharField(max_length=title_size, required=True,
                                 label='Название')
     summary = forms.CharField(max_length=summary_size,
@@ -64,9 +52,6 @@ class AddCourseForm(forms.Form):
 
 
 class AddTaskForm(forms.Form):
-    # TODO получать поля из бд
-    title_size = 50
-    summary_size = 400
     title = forms.CharField(max_length=title_size, required=True, 
                                 label='Название')
     summary = forms.CharField(max_length=summary_size,
@@ -76,3 +61,30 @@ class AddTaskForm(forms.Form):
 
     class Meta:
         fields = ('title', 'summary', 'rating')
+
+
+class EditorSubmitForm(forms.Form):
+    solution = CodeMirrorField(label='Ваш код здесь', 
+                        config_name='config', 
+                        required=False)
+
+
+class UploadCodeForm(forms.Form):
+    widget = forms.ClearableFileInput(attrs={
+            'id': 'upload_form',
+            'accept': '.py'})
+
+    file = forms.FileField(label='', required=False, widget=widget)
+
+
+class SelectLanguageForm(forms.Form):
+    language = Language.objects.all()
+    choices = ((lang.extention, lang.name) for lang in language)
+
+    widget = forms.Select(attrs={
+        'onchange': "$('#upload_form').attr('accept', this.value);\
+                     $('#select-language-form').submit()",
+        'id': 'id_language'})
+
+    status = forms.ChoiceField(label='', choices=choices, 
+                                widget=widget, required=False)

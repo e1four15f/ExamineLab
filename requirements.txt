@@ -1,7 +1,3 @@
-certifi
-Django
-jsmin
-pytz
-wincertstore
-djangocodemirror
-Pillow
+Django==2.2
+djangocodemirror==2.0.0
+Pillow==6.0.0

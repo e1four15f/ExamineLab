@@ -2,12 +2,18 @@
 
 {% block content %}
     <div class="row">
+        
+        {% include "main/includes/nav-menu-second.html" %}        
 
-        {% include "main/includes/nav-menu-second.html" %}
+        <div class="col s8 offset-s2">
+            <center>
+                <h3>{{ task.title }}</h3>
+                <span style="white-space: pre-wrap">{{ task.summary }}</span>
+            </center>
+        </div>
+    </div>
 
-        <h3>{{ task.title }}</h3>
-        <p>{{ task.summary }}</p>
-
+    <div class="row">
         <div class="col s2">
             <div class="switch">
                 <label>
@@ -18,72 +24,61 @@
             </div>
         </div>
 
-        <div class="col s7">
-            <form action="#">
+        <form id="select-language-form" method="post">{% csrf_token %}</form>
+        <form id="all-forms" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="col s6">
                 <div class="file-field input-field">
-                    <div class="btn">
+                    <div class="btn" style="width: 200px">
+                        <i class="material-icons right" style=" transform: rotate(30deg)">attach_file</i>
                         <span>Загрузить файл</span>
-                        <input type="file">
+                        {{ upload_code_form }}
                     </div>
-                    <div class="file-path-wrapper"><input class="file-path validate" type="text">
+                    <div class="file-path-wrapper">
+                        <input class="file-path validate" type="text">
                     </div>
                 </div>
-            </form>
-        </div>
+            </div>
+       
+            <div class="input-field col s3">
+                {{ select_language_form }}
+                <label>Язык</label>   
+            </div>
 
-        <div class="input-field col s3">
-            <select>
-                <!-- TODO получать список языков из бд -->
-                <option value="1">Python</option>
-                <option value="2">C++</option>
-                <option value="3">Java</option>
-            </select>
-            <label>Язык</label>
-        </div>
+            <div class="col s1">
+                <a class="modal-trigger" href="#info-modal" style="float: right">
+                    <i class="small material-icons" style="color: black; margin-top: 25px;">info_outline</i>
+                </a>
 
-        <div class="input-field col s12">
-            {% load djangocodemirror_tags %}
-            <form method="post">
-                {% csrf_token %}
-                {{ form.as_p }}
-                <button class="btn waves-effect waves-light" type="submit" name="action">Submit
-                    <i class="material-icons right">send</i>
+                <div id="info-modal" class="modal">
+                    {% include "main/includes/helps.html" %}  
+                    <div class="modal-footer">
+                        <a href="#!" class="modal-close waves-effect waves-green btn-flat">Понятно</a>
+                    </div>
+                </div>
+            </div>
+
+            <div id="editor" class="input-field col s12">
+                {{ editor_submit_form.as_p }}
+                <button class="btn waves-effect waves-light">
+                    Отправить решение<i class="material-icons right">send</i>
                 </button>
-            </form>
-            
-            {% codemirror_field_css_assets form.submit_solution %}
-            {% codemirror_field_js_assets form.submit_solution %}
-            
-            <script>
-                var foo_codemirror = CodeMirror.fromTextArea(
-                    document.getElementById("id_submit_solution"),
-                    {{ form.submit_solution|codemirror_parameters }}
-                );
-            </script>
-        </div>
-
-        <div class="input-field col s6">
+                <div class="progress" style="width: 225px; visibility: hidden;">
+                    <div class="indeterminate"></div>
+                </div>
+                {% include "main/includes/editor.html" with language="python" %}  
+            </div>
+        </form>
+        <div id="tests">{% include "main/includes/tests.html" %}</div>
+        
+        <div class="input-field col s12">
             {% if user.is_superuser %}
                 <h4>Решение задачи</h4>
-                <span style="white-space: pre-line">{{ task.solution }}</span>
+                <button onclick="foo_codemirror.setValue($('#copy-solution').text())">Скопировать решение в редактор</button>
+                <div style="border: 1px solid gray; padding: 5px;">
+                    <span id="copy-solution" style="white-space: pre-wrap;">{{ task.solution }}</span>
+                </div>
             {% endif %}
-        </div>
-
-        <div class="input-field col s6">
-            <h4>Тесты</h4>
-            {% for test in tests %}
-                <span>{{ test.title }}</span>
-                {% if not passed %}
-                    <i class="tiny material-icons yellow">cached</i>
-                {% else %}
-                    {% if passed|get_item:test.title %}
-                        <i class="tiny material-icons green">check</i>
-                    {% else %}
-                        <i class="tiny material-icons red">close</i>
-                    {% endif %}
-                {% endif %}
-                </br>
-            {% endfor %}
         </div>
     </div>
 {% endblock %}
@@ -97,6 +92,64 @@
     <script>
         $(document).ready(function(){
             $('select').formSelect();
+            $('.modal').modal();
+
+            $('#id_language').attr('name', 'language');
+            
+            $('#select-language-form').submit(function(e){
+                e.preventDefault();
+                var form = $(this);
+                var language = $('select').children("option:selected").text()
+                var re = new RegExp("language=.+", 'g')
+                var data = form.serialize()
+                data += "&language=" + language
+
+                $.ajax({
+                    url: form.attr("action"),
+                    method: form.attr("method"),
+                    data: data,
+                    success: function(response) {
+                        var style = $('div.CodeMirror').hasClass('cm-s-material')
+
+                        var solution = foo_codemirror.getValue();  
+                        $("#editor").append(response);
+                        $("#editor > p > div:nth-child(4)").remove()
+                        foo_codemirror.setValue(solution)
+
+                        if (style) { 
+                            var el = $('div.CodeMirror');
+                            el.removeClass('cm-s-eclipse'); 
+                            el.addClass('cm-s-material'); 
+                        }
+                    }
+                });
+            });
+            
+            $('#all-forms').submit(function(e){
+                $('.progress').css('visibility', 'visible');
+
+                e.preventDefault();
+                var form = $(this);
+                
+                var selected_option = $('select').children("option:selected");
+                var language = selected_option.text();
+                selected_option.val(language);
+
+                $('#id_solution').val(foo_codemirror.getValue());
+
+                $.ajax({
+                    url: form.attr("action"),
+                    method: form.attr("method"),
+                    data: new FormData(this),
+                    contentType: false,
+                    cache: false,
+                    processData: false,
+                    success: function(response) {
+                        $("#tests").empty().append(response);
+                        $('.progress').css('visibility', 'hidden');
+                    }
+                });
+            });
         });
 
         $('#switch-mode').click(function(){

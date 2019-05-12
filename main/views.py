@@ -3,16 +3,18 @@ from django.http import HttpResponse, HttpResponseNotFound, HttpResponseForbidde
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
-from .forms import NewUserForm, SubmitForm, AddCourseForm, AddTaskForm
-from .models import Course, Task, Test, PermissionGroup, Permission
+from django.forms.models import model_to_dict
+from .forms import NewUserForm, AddCourseForm, AddTaskForm, EditorSubmitForm, UploadCodeForm, SelectLanguageForm
+from .models import Course, Task, Test, Language
 
 from modules.Tests import testReciever 
+from modules.Containers.client import send_request
 import os
 
 
 def profile(request):
     if request.user.is_anonymous:
-        return HttpResponseNotFound()
+        return redirect('ExamineLab:register')
 
     if request.is_ajax():
         image = request.FILES.get('avatar')
@@ -27,7 +29,7 @@ def profile(request):
 
 def single_slug(request, single_slug):
     if request.user.is_anonymous:
-        return HttpResponseNotFound()
+        return redirect('ExamineLab:register')
 
     if request.is_ajax():
         course = Course.objects.get(pk=int(single_slug))
@@ -37,7 +39,7 @@ def single_slug(request, single_slug):
     else:
         try:
             course = Course.objects.get(pk=int(single_slug))
-            tasks = Task.objects.filter(course__id=course.id).order_by('title')
+            tasks = Task.objects.filter(course__id=course.id).order_by('rating')
 
             return render(request=request,
                         template_name='main/course.html',
@@ -49,42 +51,73 @@ def single_slug(request, single_slug):
 
 
 def task_single_slug(request, single_slug, task_single_slug):
+    if request.user.is_anonymous:
+        return redirect('ExamineLab:register')
+
     try:
         course = Course.objects.get(pk=int(single_slug))
         task = Task.objects.get(pk=int(task_single_slug))
-        tests = Test.objects.filter(task__id=task.id).order_by('title')
+        tests = Test.objects.filter(task__id=task.id).order_by('-public')
+        public_tests = tests.filter(public=True)
 
-        if request.method == 'POST':
-            form = SubmitForm(request.POST)
-
-            if form.is_valid():
-                test_checker = testReciever.TestReciever('python3')
+        if request.is_ajax():
+            selected_language = request.POST['language']
+            if 'solution' in request.POST:
+                editor_submit_form = EditorSubmitForm(request.POST)
+                upload_code_form = UploadCodeForm(request.POST, request.FILES)
+                select_language_form = SelectLanguageForm(request.POST)
                 
-                #tests_paths = [os.path.abspath('./temp/tests/'+p) for p in os.listdir('./temp/tests')]
-                #print(tests_paths)
-                user_code_hash = 'program' + str(hash(form.data['submit_solution'])) + '.py'
-                with open(user_code_hash,'w') as user_pr:
-                    user_pr.write(form.data['submit_solution'])
-                passed = test_checker.perform_testing(user_code_hash, tests)
-                os.remove(user_code_hash)
+                uploaded_code = request.FILES.get('file') 
+                submited_solution = editor_submit_form.data['solution']
+
+                user_code = uploaded_code.read() if uploaded_code != None else submited_solution
+
+                try:
+                    user_code = user_code.decode('ascii')
+                except AttributeError:
+                    pass
+                
+                data = {
+                    'user_code': user_code,
+                    'tests': [t for t in tests.values()],
+                    'language': model_to_dict(Language.objects.get(pk=selected_language))
+                }
+                passed, outs = send_request(data)
+                
+                public_outs = outs[:len(public_tests)]
+                public_tests = public_tests.values()
+                for test, out in zip(public_tests, public_outs):
+                    test['result'] = out[0]
+                    test['error'] = out[1]
+                
                 return render(request=request,
-                      template_name='main/task.html',
-                      context={'course': course,
-                               'task': task,
-                               'form': form,
-                               'tests': tests,
-                               'passed': passed})
+                        template_name='main/includes/tests.html',
+                        context={'tests': public_tests,
+                                 'passed': passed})
+            else:
+                editor_submit_form = EditorSubmitForm()
+                return render(request=request,
+                        template_name='main/includes/editor.html',
+                        context={'editor_submit_form': editor_submit_form,
+                                 'language': selected_language.lower()})
+            
         else:
-            form = SubmitForm()
+            editor_submit_form = EditorSubmitForm()
+            upload_code_form = UploadCodeForm()
+            select_language_form = SelectLanguageForm()
 
         return render(request=request,
                       template_name='main/task.html',
-                      context={'course': course,
+                      context={'languages': Language.objects.all(),
+                               'course': course,
                                'task': task,
-                               'form': form,
-                               'tests': tests})
+                               'editor_submit_form': editor_submit_form,
+                               'upload_code_form': upload_code_form,
+                               'select_language_form': select_language_form,
+                               'tests': public_tests})
 
-    except:
+    except Exception as e:
+        print(e)
         return HttpResponseNotFound()
 
 
@@ -94,6 +127,9 @@ def homepage(request):
 
 
 def courses(request):
+    if request.user.is_anonymous:
+        return redirect('ExamineLab:register')
+
     courses = Course.objects.all()
     if request.user.is_anonymous:
         return register(request)
