@@ -4,33 +4,80 @@
     <div class="row">
 
         {% include "main/includes/nav-menu-first.html" %}
-
-        <h2 style="display: inline-block" class="card-title">{{ course.title }}</h2>
-        {% if user.is_superuser %}    
-            <a href="../add_task?course_id={{ course.id }}" style="display: inline-block">
-                <i class="material-icons green-text text-lighten-1">add_box</i>
-            </a>
-        {% endif %}
-        <p>{{ course.summary }}</p>
-        <ul class="collapsible"> <!-- expandable -->
-            {% for t in tasks %}
-                <li>
-                  <div class="collapsible-header"><i class="material-icons">filter_drama</i>{{ t.title }}</div>
-                  <div class="collapsible-body">
-                      <span>{{ t.summary }}</span>
-                      <span>{{ t.rating }}</span>
-                      <a href="{{ course.id }}/{{ t.id }}" class="waves-effect waves-light btn">Начать!</a>
-                  </div>
-                </li>
-            {% endfor %}
-        </ul>
-
+        <div class="col s10">
+            <h2 style="display: inline-block" class="card-title">{{ course.title }}</h2>
+            {% if user.is_superuser %}    
+                <a href="../add_task?course_id={{ course.id }}" style="display: inline-block;">
+                    <i class="material-icons green-text text-lighten-1">add_box</i>
+                </a>
+            {% endif %}
+        </div>
+        <div class="col s2">
+            {% if not course|check_in_course:user_courses %}
+                <a id="enroll-btn" href="#" onclick="enroll()" class="waves-effect waves-light btn">Записаться</a>
+                <p id="in-course" style="display: none;">Вы участвуете!</p>
+            {% else %}
+                <p id="in-course">Вы участвуете!</p>
+            {% endif %}
+        </div>
+        <div class="col s12">
+            <p>{{ course.summary }}</p>
+            <ul class="collapsible"> <!-- expandable -->
+                {% for t in tasks %}
+                    <li>
+                    <div class="collapsible-header"><i class="material-icons">filter_drama</i>{{ t.title }}</div>
+                    <div class="collapsible-body">
+                            <span>{{ t.summary }}</span>
+                            <span>{{ t.rating }}</span>
+                            <a href="{{ course.id }}/{{ t.id }}" class="waves-effect waves-light btn
+                            {% if not course|check_in_course:user_courses %}
+                                disabled
+                            {% endif %}
+                            ">Начать!</a>
+                    </div>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
 	</div>
-	<script>
+{% endblock %}
+
+{% block scripts %}
+    <script>
         $(document).ready(function(){
             $(".collapsible").collapsible({accordion: true});
             $(".collapsible").collapsible({accordion: false});
         });
-    </script>
-{% endblock %}
 
+        function enroll() {
+            var data = "&csrfmiddlewaretoken={{ csrf_token }}";
+            $.ajax({
+                url: '#',
+                method: 'POST',
+                data: data,
+                success: function(response) {
+                    $('#enroll-btn').remove();
+                    $('#in-course').css('display', 'block');
+                    $('div.collapsible-body > a').removeClass('disabled');
+                    M.toast({html: 'Вы записались на курс!',
+                            classes: 'green',
+                            display_length: 1000})
+                }
+            });
+        }
+    </script>
+    
+    <style>
+        #enroll-btn {
+            margin-top: 45px;
+            float: right;
+        }
+        #in-course {
+            color:red;
+            margin-top: 60px;
+            margin-right: 25px;
+            float: right;
+            text-align: center;
+        }
+    </style>
+{% endblock %}

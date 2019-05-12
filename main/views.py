@@ -26,15 +26,26 @@ def profile(request):
 
 
 def single_slug(request, single_slug):
-    try:
-        course = Course.objects.get(pk=int(single_slug))
-        tasks = Task.objects.filter(course__id=course.id).order_by('title')
-        return render(request=request,
-                      template_name='main/course.html',
-                      context={'course': course,
-                               'tasks': tasks})
-    except:
+    if request.user.is_anonymous:
         return HttpResponseNotFound()
+
+    if request.is_ajax():
+        course = Course.objects.get(pk=int(single_slug))
+        request.user.add_course(course)
+        print(f'{request.user} записался на курс {course}')
+        return HttpResponse()
+    else:
+        try:
+            course = Course.objects.get(pk=int(single_slug))
+            tasks = Task.objects.filter(course__id=course.id).order_by('title')
+
+            return render(request=request,
+                        template_name='main/course.html',
+                        context={'course': course,
+                                'tasks': tasks,
+                                'user_courses': request.user.courses.all()})
+        except:
+            return HttpResponseNotFound()
 
 
 def task_single_slug(request, single_slug, task_single_slug):
@@ -126,7 +137,7 @@ def register(request):
             messages.success(request, f'Создан новый аккаунт {username}')
             login(request, user)
             messages.info(request, f'Добро пожаловать, {username}')
-            return redirect('ExamineLab:homepage')
+            return redirect('ExamineLab:courses')
         else:
             for msg in form.error_messages:
                 messages.error(request, f'{msg}: {form.error_messages[msg]}')
@@ -153,7 +164,7 @@ def login_request(request):
             if user is not None:
                 login(request, user)
                 messages.info(request, f'Добро пожаловать, {username}')
-                return redirect('ExamineLab:homepage')
+                return redirect('ExamineLab:courses')
             else:
                 messages.error(request, 'Неверный email или пароль')
         else:
