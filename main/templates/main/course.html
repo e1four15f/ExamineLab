@@ -5,7 +5,7 @@
 
         {% include "main/includes/nav-menu-first.html" %}
 
-        <div class="col s10">
+        <div class="col s8">
             <h2 style="display: inline-block" class="card-title">{{ course.title }}</h2>
             {% if user.is_superuser or course.author == user %}    
                 <a href="../add_task?course_id={{ course.id }}" style="display: inline-block;">
@@ -14,24 +14,58 @@
             {% endif %}
         </div>
         <div class="col s2">
+            {% if user.is_superuser or course.author == user %}
+                <a id="participants-btn" href="#participants-modal" 
+                        class="waves-effect waves-light btn modal-trigger">Участники</a>
+                 
+                <div id="participants-modal" class="modal">
+                    <div class="modal-content">
+                        <h4>Участники курса</h4>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Имя</th>
+                                    <th>Фамилия</th>
+                                    <th>Email</th>
+                                </tr>
+                            </thead>
+                    
+                            <tbody>
+                                {% for user in participants_users %}
+                                    <tr>
+                                        <td>{{ user.first_name }}</td>
+                                        <td>{{ user.last_name }}</td>
+                                        <td>{{ user.email }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="modal-footer">
+                        <a href="#!" class="modal-close waves-effect waves-green btn-flat">Закрыть</a>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+        <div class="col s2">
             {% if not course in user_courses %}
                 <a id="enroll-btn" href="#" onclick="enroll()" class="waves-effect waves-light btn">Записаться</a>
                 <p id="in-course" style="display: none;">Вы участвуете!</p>
             {% else %}
-                <p id="in-course">Вы участвуете!</p>
+                <p id="in-course"><b>Вы участвуете!</b></p> 
             {% endif %}
         </div>
 
-        <div class="col s12">
-            <p>{{ course.summary }}</p>
+        <div class="col s12 center-align">
+            <h6>{{ course.summary }}</h6>
         </div>
         
-        <div class="col s12">    
-            <ul class="collapsible" style="text-align: center;"> 
+        <div class="col s6 m4">    
+            <ul style="text-align: center;"> 
                 {% for t in tasks %}
-                    <li id="task-{{ t.id }}">
+                    <li id="task-{{ t.id }}" class="z-depth-1">
                         <div class="admin-icons">
-                            {% if user.is_superuser or course.author == user %}  
+                            {% if user.is_superuser or course.author == user %}
                                 <a href="../edit_task?task_id={{ t.id }}">
                                     <i class="material-icons yellow-text text-lighten-1">edit</i>
                                 </a>
@@ -59,32 +93,38 @@
                             {% else %}
                                 blue-grey
                             {% endif %}
-                            ">
+                            " onclick="show_task('{{ t.id }}')">
                             <h5><i class="material-icons">assignment</i></h5>
                             <h5>{{ t.title }}</h5>
-                        </div>
-                        <div class="collapsible-body">
-                            <h5><b>Описание задачи</b></h5>
-                            <span style="white-space: pre-wrap">{{ t.summary }}</span>
-                            <p>
-                                <hr style="width: 30%"/>
-                                <h5><b>Сложность</b></h5>
-                                {% if t.rating != 0 %}
-                                    {% for i in t.rating|rjust:t.rating %}
-                                        <i class="material-icons" style="color: orange;">star</i>
-                                    {% endfor %}
-                                {% endif %}
-                            </p>
-                            <a href="{{ course.id }}/{{ t.id }}" class="waves-effect waves-light btn
-                            {% if not course in user_courses %}
-                                disabled
-                            {% endif %}
-                            ">Приступить к выполнению!</a>
                         </div>
                     </li>
                 {% endfor %}
             </ul>
         </div>
+
+        <div id="task-info" class="col s6 offset-m2">
+            {% for t in tasks %}
+                <div id="task-info-{{ t.id }}" style="text-align: center; display: none;">
+                    <h5><b>Описание задачи</b></h5>
+                    <span style="white-space: pre-wrap">{{ t.summary }}</span>
+                    <p>
+                        <hr style="width: 30%"/>
+                        <h5><b>Сложность</b></h5>
+                        {% if t.rating != 0 %}
+                            {% for i in t.rating|rjust:t.rating %}
+                                <i class="material-icons" style="color: orange;">star</i>
+                            {% endfor %}
+                        {% endif %}
+                    </p>
+                    <a href="{{ course.id }}/{{ t.id }}" class="waves-effect waves-light btn
+                    {% if not course in user_courses %}
+                        disabled
+                    {% endif %}
+                    ">Приступить к выполнению!</a>
+                </div>
+            {% endfor %}
+        </div>
+
 	</div>
 {% endblock %}
 
@@ -104,7 +144,7 @@
                 success: function(response) {
                     $('#enroll-btn').remove();
                     $('#in-course').css('display', 'block');
-                    $('div.collapsible-body > a').removeClass('disabled');
+                    $('#task-info > div > a').removeClass('disabled');
                     M.toast({html: 'Вы записались на курс!',
                             classes: 'green',
                             display_length: 1000})
@@ -127,6 +167,14 @@
                 }
             });
         }
+
+        function show_task(task_id) {
+            $('#task-info > div').css('display', 'none');
+            $('#task-info-' + task_id).css('display', 'block');
+            
+            $('div.col ul > li > div.collapsible-header').removeClass('selected-task');
+            $('#task-' + task_id + '> div.collapsible-header').addClass('selected-task');
+        }
     </script>
     
     <style>
@@ -134,8 +182,11 @@
             color: white;
             padding: 0rem 0.4rem;
         }
+        #participants-btn {
+            margin-top: 50px;
+        }
         #enroll-btn {
-            margin-top: 45px;
+            margin-top: 50px;
             float: right;
         }
         #in-course {
@@ -156,6 +207,15 @@
         .model-choice {
             z-index: 6;
             width: 30%;
+        }
+        .selected-task {
+            background-color: #ee6e73 !important;
+        }
+        #task-info {
+            border: 1px dashed #ee6e73;
+            min-height: 150px;
+            padding: 60px 10px;
+            margin-top: 10px;
         }
     </style>
 {% endblock %}

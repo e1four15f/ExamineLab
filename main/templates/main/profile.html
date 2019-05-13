@@ -2,7 +2,7 @@
 
 {% load static %}
 {% block content %}
-    <div class="row">
+    <div class="row" style="margin-top: 20px;">
         <div class="col s4 center-align">
             <h5>{{ user.first_name }} {{ user.last_name }}</h5>
             <form id="load-avatar-form" method="post" enctype="multipart/form-data" onchange="$(this).submit()">
@@ -12,7 +12,7 @@
                     <!-- TODO Аватарки сжимаются под размер -->
                     <img onclick="$('#load-avatar').trigger('click')" class="responsive-img"
                     {% if user.avatar %}
-                        src="{{ user.avatar.url }}">
+                        src="../{{ user.avatar.url }}">
                     {% else %}
                         src="{% static 'main/images/nopic.jpg' %}"/>
                     {% endif %}
@@ -23,16 +23,18 @@
 
         <div class="col s8">
             <div class="row">
-                <center><h2>Мои курсы</h2></center>
                 <ul class="tabs">
-                    <li class="tab"><a href="#active" class="active">Активные</a></li>
-                    <li class="tab"><a href="#completed">Завершенные</a></li>
+                    <li class="tab"><a href="#active" class="active">Активные курсы</a></li>
+                    <li class="tab"><a href="#completed">Завершенные курсы</a></li>
                 </ul>
             </div>
             
             <div class="row">
                 <div id="active" class="col s12">
                     {% for c in user.courses.all %}
+                        {% if forloop.counter|divisibleby:2 %}
+                            <div class="row" style="margin-bottom: 0px">
+                        {% endif %}
                         <div class="col s6">
                             <a href="/courses/{{ c.id }}">
                                 <div class="card blue-grey darken-1 hoverable">
@@ -52,11 +54,17 @@
                                 </div>
                             </a>
                         </div>
+                        {% if forloop.counter|divisibleby:2 %}
+                            </div>
+                        {% endif %}
                     {% endfor %}
                 </div>
             
                 <div id="completed" class="col s12">
                     {% for c in user.completed_courses.all %}
+                        {% if forloop.counter|divisibleby:2 %}
+                            <div class="row" style="margin-bottom: 0px">
+                        {% endif %}
                         <div class="col s6">
                             <a href="/courses/{{ c.id }}">
                                 <div class="card blue-grey darken-1 hoverable">
@@ -67,6 +75,9 @@
                                 </div>
                             </a>
                         </div>
+                        {% if forloop.counter|divisibleby:2 %}
+                            </div>
+                        {% endif %}
                     {% endfor %}
                 </div>
             </div>
@@ -105,6 +116,9 @@
         .responsive-img {
             height: 300px !important;
             width: 300px !important;
+        }
+        .progress .determinate {
+            background-color: #ee6e73 !important;
         }
     </style>
 {% endblock %}

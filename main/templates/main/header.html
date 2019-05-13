@@ -23,6 +23,17 @@
     body {
         font-family: -apple-system, BlinkMacSystemFont, sans-serif;
     }
+    #background {
+        background-color: #EFEFEF;
+        display: flex;
+        flex-direction: column;
+        min-height: 93vh;
+    }
+    .container {
+        padding: 0px 60px;
+        background-color: white;
+        flex: 1;
+    }
 </style>
 
 {% block scripts %}
@@ -33,10 +44,10 @@
     {% include 'main/includes/navbar.html' %}
     {% include 'main/includes/messages.html' %}
 
-    <div class="container">
-        <br>
-        {% block content %}
-        {% endblock %}
+    <div id="background">
+        <div class="container z-depth-1">        
+            {% block content %}
+            {% endblock %}
+        </div>
     </div>
-
 </body>

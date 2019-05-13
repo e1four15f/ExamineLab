@@ -43,17 +43,19 @@ def single_slug(request, single_slug):
         request.user.add_course(course)
         print(f'{request.user} записался на курс {course}')
         return HttpResponse()
-    else:
-        course = Course.objects.get(pk=int(single_slug))
-        tasks = Task.objects.filter(course__id=course.id).order_by('rating')
-        completed_tasks = [t.id for t in request.user.completed_tasks.all()]
+    
+    course = Course.objects.get(pk=int(single_slug))
+    tasks = Task.objects.filter(course__id=course.id).order_by('rating')
+    completed_tasks = [t.id for t in request.user.completed_tasks.all()]
 
-        return render(request=request,
-                      template_name='main/course.html',
-                      context={'course': course,
-                               'tasks': tasks,
-                               'user_courses': request.user.courses.all(),
-                               'completed_tasks': completed_tasks})
+    participants_users = User.objects.filter(courses__in=[course])
+    return render(request=request,
+                  template_name='main/course.html',
+                  context={'course': course,
+                           'tasks': tasks,
+                           'user_courses': request.user.courses.all(),
+                           'completed_tasks': completed_tasks,
+                           'participants_users': participants_users})
 
 
 def task_single_slug(request, single_slug, task_single_slug):
