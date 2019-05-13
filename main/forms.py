@@ -43,7 +43,7 @@ class NewUserForm(UserCreationForm):
 class AddCourseForm(forms.Form):
     title = forms.CharField(max_length=title_size, required=True,
                                 label='Название')
-    summary = forms.CharField(max_length=summary_size,
+    summary = forms.CharField(max_length=summary_size, widget=forms.Textarea({'style': 'resize: vertical;'}),
                                 label='Описание')
 
     class Meta:
@@ -53,7 +53,7 @@ class AddCourseForm(forms.Form):
 class AddTaskForm(forms.Form):
     title = forms.CharField(max_length=title_size, required=True, 
                                 label='Название')
-    summary = forms.CharField(max_length=summary_size,
+    summary = forms.CharField(max_length=summary_size, widget=forms.Textarea({'style': 'resize: vertical;'}),
                                 label='Описание')
     # TODO Поля для добавление Test-ов
     #rating = forms.Ch

@@ -1,9 +1,12 @@
 {% if user.is_authenticated %}
     {% if user.is_superuser %}
         <li><a href="/admin">Администрирование</a></li>
+        <li><a href="/roles">Права</a></li>
         <li><a href="/profile">Профиль</a></li>
+    {% elif user.is_staff %}
+        <li><a href="/profile">Преподаватель: {{ user.first_name }} {{ user.last_name }} {{ user.username }}</a></li>
     {% else %}
-        <li><a href="/profile">{{ user.username }}</a></li>
+        <li><a href="/profile">Студент: {{ user.first_name }} {{ user.last_name }} {{ user.username }} </a></li>
     {% endif %}
     <li><a href="/logout">Выйти</a></li>
 {% else %}

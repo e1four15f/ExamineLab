@@ -1,0 +1,83 @@
+{% extends 'main/header.html' %}
+
+{% block content %}
+    <div class="row">
+        <table>
+            <thead>
+                <tr>
+                    <th>Имя</th>
+                    <th>Фамилия</th>
+                    <th>Email</th>
+                    <th>Студент</th>
+                    <th>Преподаватель</th>
+                    <th>Администратор</th>
+                </tr>
+            </thead>
+    
+            <tbody>
+                {% for user in users %}
+                    <tr>
+                        <td>{{ user.first_name }}</td>
+                        <td>{{ user.last_name }}</td>
+                        <td>{{ user.email }}</td>
+                        <td>
+                            <label>
+                                <input class="with-gap" name="roles-group-{{ user }}" type="radio" 
+                                    checked onchange="change_role('{{ user.pk }}', 'is_user')"/>
+                                <span></span>
+                            </label>
+                        </td>
+                        <td>
+                            <label>
+                                <input class="with-gap" name="roles-group-{{ user }}" type="radio" 
+                                    onchange="change_role('{{ user.pk }}', 'is_staff')"
+                                    {% if user.is_staff %}
+                                    checked
+                                    {% endif %}
+                                    />
+                                <span></span>
+                            </label>
+                        </td>
+                        <td>
+                            <label>
+                                <input class="with-gap" name="roles-group-{{ user }}" type="radio"
+                                    onchange="change_role('{{ user.pk }}', 'is_superuser')"
+                                    {% if user.is_superuser %}
+                                    checked
+                                    {% endif %}
+                                    />
+                                <span></span>
+                            </label>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
+
+
+{% block scripts %}
+    <script>
+        function change_role(user_id, role) {
+            var data = "user_id=" + user_id + "&role=" + role
+                    + "&csrfmiddlewaretoken={{ csrf_token }}";
+            $.ajax({
+                url: '#',
+                method: 'POST',
+                data: data,
+                success: function(response) {
+                    M.toast({html: `${user_id} теперь ${role}`,
+                            classes: 'pink',
+                            display_length: 100});
+                }
+            });
+        }
+    </script>
+
+    <style>
+        th, td {
+            text-align: center;
+        }
+    </style>
+{% endblock %}

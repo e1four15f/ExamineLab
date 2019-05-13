@@ -13,12 +13,13 @@ class Course(models.Model):
     """Таблица с курсами"""
     title = models.CharField(max_length=title_size)
     summary = models.TextField(max_length=summary_size, null=True, blank=True)
+    author = models.ForeignKey('User', on_delete=models.SET_DEFAULT, default='admin')
 
     class Meta:
         verbose_name_plural = 'Courses'
 
     def __str__(self):
-        return self.title
+        return f'{self.title}: {self.author}'
 
 
 class Task(models.Model):

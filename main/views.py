@@ -5,7 +5,7 @@ from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
 from django.forms.models import model_to_dict
 from .forms import NewUserForm, AddCourseForm, AddTaskForm, EditorSubmitForm, UploadCodeForm, SelectLanguageForm
-from .models import Course, Task, Test, Language
+from .models import Course, Task, Test, Language, User
 
 from modules.Tests import testReciever 
 from modules.Containers.client import send_request
@@ -92,9 +92,10 @@ def task_single_slug(request, single_slug, task_single_slug):
             completed_course = False
             if all(passed.values()):
                 request.user.completed_tasks.add(task)
-                completed_tasks = request.user.completed_tasks.all()
+                completed_tasks = request.user.completed_tasks.all().filter(course=course.id)
                 course_tasks = Task.objects.filter(course=course.id)
-                if len(completed_tasks) == len(completed_tasks | course_tasks):
+
+                if set(completed_tasks) == set(course_tasks):
                     request.user.completed_courses.add(course)
                     # TODO Удалить m2m референс, не сам курс
                     #completed_course = request.user.courses.all().get(id=course.id)
@@ -148,32 +149,35 @@ def courses(request):
     courses = Course.objects.all()
     if request.is_ajax():
         if 'filters' in request.POST:
-            # TODO Комбинации фильтров
+            user_completed_courses = [c.id for c in request.user.completed_courses.all()]
             if 'completed_courses' in request.POST:
                 completed_courses = bool(request.POST['completed_courses'])
                 if completed_courses:
-                    courses = request.user.completed_courses.all()
+                    courses = courses.filter(pk__in=user_completed_courses)
 
             if 'enrolled_courses' in request.POST:
                 enrolled_courses = bool(request.POST['enrolled_courses'])
                 if enrolled_courses:
-                    courses = request.user.courses.all()
+                    enrolled_courses = [c.id for c in request.user.courses.all()]
+                    courses = courses.filter(pk__in=enrolled_courses)
+
+            if 'my_courses' in request.POST:
+                my_courses = bool(request.POST['my_courses'])
+                if my_courses:
+                    courses = courses.filter(author=request.user)
     
             if 'search' in request.POST:
                 search = str(request.POST['search'])
                 if search:
                     courses = courses.filter(title__contains=search)
 
-            completed_courses = [c.id for c in request.user.completed_courses.all()]
             return render(request=request,
                           template_name='main/includes/courses-panel.html',
                           context={'courses': courses,
                                    'user_courses': request.user.courses.all(),
-                                   'completed_courses': completed_courses})  
-
+                                   'completed_courses': user_completed_courses})  
 
         course_id = request.POST['course_id']
-
         if 'in_course' in request.POST: 
             in_course = bool(request.POST['in_course'])
             selected_course = Course.objects.get(id=course_id)
@@ -258,19 +262,20 @@ def error_404(request):
 def add_or_edit_course(request):
     if request.user.is_anonymous:
         return redirect('ExamineLab:register')
-
+    
     course_id = None
     if request.method == 'POST':
         form = AddCourseForm(request, request.POST)
         title = request.POST['title']
         summary = request.POST['summary']
         
-        if request.path == '/add_course':
-            new_course = Course(title=title, summary=summary)
+        if request.path == '/add_course/':
+            new_course = Course(title=title, summary=summary, author=request.user)
             new_course.save()
             messages.success(request, f'Добавлен новый курс {title}')
             print(f'Добавлен новый курс {title}')
-        elif request.path == '/edit_course':
+
+        elif request.path == '/edit_course/':
             course_id = request.GET['course_id']
             selected_course = Course.objects.get(pk=course_id)
             selected_course.title = title
@@ -280,14 +285,14 @@ def add_or_edit_course(request):
             print(f'Обновлён курс {title}')
         
         return redirect('ExamineLab:courses')
-
-    if request.path == '/add_course':
+    
+    if request.path == '/add_course/':
         form = AddCourseForm()
         return render(request=request,
-                        template_name='main/add_or_edit_course.html',
-                        context={'form': form})
+                      template_name='main/add_or_edit_course.html',
+                      context={'form': form})
 
-    elif request.path == '/edit_course':
+    elif request.path == '/edit_course/':
         course_id = request.GET['course_id']
         course = Course.objects.get(pk=course_id)
     
@@ -295,15 +300,18 @@ def add_or_edit_course(request):
                                       'summary': course.summary})
         
         return render(request=request,
-                        template_name='main/add_or_edit_course.html',
-                        context={'form': form,
-                                'course': course})
+                      template_name='main/add_or_edit_course.html',
+                      context={'form': form,
+                              'course': course})
 
 
 
 
 def add_or_edit_task(request):
-    if request.path == '/add_task':
+    if request.user.is_anonymous:
+        return redirect('ExamineLab:register')
+
+    if request.path == '/add_task/':
         course_id = request.GET['course_id']
         course = Course.objects.get(pk=course_id)
 
@@ -317,10 +325,39 @@ def add_or_edit_task(request):
             return render(request=request,
                           template_name='main/add_task.html',
                           context={'course': course,
-                                  'form': form})
+                                   'form': form})
 
         return HttpResponseNotFound()
-    elif request.path == '/edit_task':
+    elif request.path == '/edit_task/':
         # TODO 
         pass
 
+
+def roles(request):
+    if not request.user.is_superuser:
+        return redirect('ExamineLab:register')
+
+    if request.is_ajax():
+        user_id = request.POST['user_id']
+        role = request.POST['role']
+
+        user = User.objects.get(pk=user_id)
+        if role == 'is_user':
+            user.is_primary_user = True
+            user.is_staff = False
+            user.is_superuser = False
+        elif role == 'is_staff':
+            user.is_primary_user = True
+            user.is_staff = True
+            user.is_superuser = False
+        elif role == 'is_superuser':
+            user.is_primary_user = True
+            user.is_staff = True
+            user.is_superuser = True
+        user.save()
+
+        return HttpResponse()
+
+    return render(request=request,
+                  template_name='main/roles.html',
+                  context={'users': User.objects.all()})
