@@ -1,5 +1,5 @@
 <head>
-    {% load static %}
+    {% load static %}  
     <!-- Compiled and minified Materialize CSS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
     <link href="{% static 'main/css/custom.css' %}" rel="stylesheet">
@@ -11,7 +11,7 @@
     <!-- Compiled and minified Materialize JavaScript -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
 
-    {% if tests %}
+    {% if editor_submit_form %}
         <link href="{% static 'CodeMirror/theme/material.css' %}" rel="stylesheet">
         <link href="{% static 'CodeMirror/theme/eclipse.css' %}" rel="stylesheet">
         <link href="{% static 'CodeMirror/addon/scroll/simplescrollbars.css' %}" rel="stylesheet">

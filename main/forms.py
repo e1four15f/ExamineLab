@@ -1,14 +1,19 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth import password_validation
 from djangocodemirror.fields import CodeMirrorField
 from .models import User, Language, title_size, summary_size
 
 
+class CustomAuthForm(AuthenticationForm):
+    username = forms.CharField(widget=forms.TextInput(attrs={'class':'validate'}), label='Email')
+    password = forms.CharField(widget=forms.PasswordInput(), label='Пароль')
+
+
 class NewUserForm(UserCreationForm):
-    first_name = forms.CharField(max_length=50, required=False,
+    first_name = forms.CharField(max_length=50, required=True,
                                 label='Имя')
-    last_name = forms.CharField(max_length=50, required=False, 
+    last_name = forms.CharField(max_length=50, required=True, 
                                 label='Фамилия')
     email = forms.EmailField(required=True)
     password1 = forms.CharField(
@@ -43,7 +48,7 @@ class NewUserForm(UserCreationForm):
 class AddCourseForm(forms.Form):
     title = forms.CharField(max_length=title_size, required=True,
                                 label='Название')
-    summary = forms.CharField(max_length=summary_size, widget=forms.Textarea({'style': 'resize: vertical;'}),
+    summary = forms.CharField(max_length=summary_size, widget=forms.Textarea({'style': 'resize: vertical; height: 300px;'}),
                                 label='Описание')
 
     class Meta:
@@ -53,13 +58,29 @@ class AddCourseForm(forms.Form):
 class AddTaskForm(forms.Form):
     title = forms.CharField(max_length=title_size, required=True, 
                                 label='Название')
-    summary = forms.CharField(max_length=summary_size, widget=forms.Textarea({'style': 'resize: vertical;'}),
+    summary = forms.CharField(max_length=summary_size, widget=forms.Textarea({'style': 'resize: vertical; height: 300px;'}),
                                 label='Описание')
-    # TODO Поля для добавление Test-ов
-    #rating = forms.Ch
+
+    rating = forms.CharField(label='Сложность')
+    solution = forms.CharField(widget=forms.Textarea({'style': 'resize: vertical;'}),
+                                label='Решение задачи', required=False)
 
     class Meta:
-        fields = ('title', 'summary', 'rating')
+        fields = ('title', 'summary', 'rating', 'solution')
+
+
+class AddTestForm(forms.Form):
+    title = forms.CharField(max_length=title_size, required=True, 
+                                label='Название')
+    input = forms.CharField(max_length=summary_size, widget=forms.Textarea({'style': 'resize: vertical; height: 300px;'}),
+                                label='Входные данные')
+    output = forms.CharField(max_length=summary_size, widget=forms.Textarea({'style': 'resize: vertical; height: 300px;'}),
+                                label='Выходные данные')
+    
+    public = forms.BooleanField(label='Публичный тест')
+
+    class Meta:
+        fields = ('title', 'input', 'output', 'public')
 
 
 class EditorSubmitForm(forms.Form):

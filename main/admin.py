@@ -8,6 +8,7 @@ admin.site.register(Course)
 admin.site.register(Task)
 admin.site.register(Test)
 admin.site.register(User)
+admin.site.register(Statistics)
 #admin.site.register(PermissionGroup)
 #admin.site.register(Permission)
 #admin.site.register(UserCourseSpecificPermissions)
@@ -47,3 +48,16 @@ def get_course_progress(course_id, completed_tasks):
         'completed': len(completed_tasks)
     }
     return data
+
+
+@register.filter
+def get_completed(participation_set, completed):
+    return participation_set.filter(completed=completed)
+
+
+@register.filter
+def is_completed(course, user):
+    course = user.participation_set.filter(course=course)
+    if len(course):
+        return course.first().completed
+    return False

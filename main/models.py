@@ -69,13 +69,13 @@ class Test(models.Model):
 class User(AbstractUser):
     email = models.CharField(max_length=40, primary_key=True)
     #global_permission_groups = models.ManyToManyField(PermissionGroup)
-    courses = models.ManyToManyField(Course, through='UserCourseParticipation')
+    courses = models.ManyToManyField(Course, through='Participation')
     completed_tasks = models.ManyToManyField(Task, blank=True, related_name='completed_tasks')
-    completed_courses = models.ManyToManyField(Course, blank=True, related_name='completed_courses')
+    
     avatar = models.ImageField(null=True, blank=True)
-    USERNAME_FIELD = 'email'
+    #USERNAME_FIELD = 'email'
     #objects = UserManager()
-    REQUIRED_FIELDS = []
+    #REQUIRED_FIELDS = []
 
     #def has_permission_group(self, permission_group, course=None):
     #    if course is None:
@@ -102,13 +102,27 @@ class User(AbstractUser):
     def __str__(self):
         return f'{self.email} {self.first_name} {self.last_name}'
 
-        
+
+class Statistics(models.Model):
+    date = models.DateField()
+    sends = models.SmallIntegerField(default=0)
+    completed_tasks = models.SmallIntegerField(default=0)
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f'{self.user}\' stats'
+
+    class Meta:
+        unique_together = (("user", "date"),)
+
+
 class Language(models.Model):
     """Таблица с языками программировани"""
     name = models.CharField(max_length=50, primary_key=True)
     extention = models.CharField(max_length=10)
     launch_command_linux = models.CharField(max_length=550)
-    optional_linux = models.CharField(max_length=351,default='rm <path>*')
+    optional_linux = models.CharField(max_length=351, default='rm <path>*')
 
     input_help = models.TextField(max_length=550, default='')
     output_help = models.TextField(max_length=550, default='')
@@ -125,7 +139,8 @@ class Language(models.Model):
 #    course = models.ForeignKey(Course, on_delete=models.CASCADE)
 #
 
-class UserCourseParticipation(models.Model):
+class Participation(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     date_joined = models.DateField()
+    completed = models.BooleanField(default=False)

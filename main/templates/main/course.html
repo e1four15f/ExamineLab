@@ -60,13 +60,13 @@
             <h6>{{ course.summary }}</h6>
         </div>
         
-        <div class="col s6 m4">    
+        <div class="col s12 m6 l6 xl5">    
             <ul style="text-align: center;"> 
                 {% for t in tasks %}
                     <li id="task-{{ t.id }}" class="z-depth-1">
                         <div class="admin-icons">
                             {% if user.is_superuser or course.author == user %}
-                                <a href="../edit_task?task_id={{ t.id }}">
+                                <a href="../edit_task?course_id={{ course.id }}&task_id={{ t.id }}">
                                     <i class="material-icons yellow-text text-lighten-1">edit</i>
                                 </a>
                                 <a href="#modal-delete" class="modal-trigger" 
@@ -102,7 +102,7 @@
             </ul>
         </div>
 
-        <div id="task-info" class="col s6 offset-m2">
+        <div id="task-info" class="col s12 m6 l6 xl6 offset-xl1">
             {% for t in tasks %}
                 <div id="task-info-{{ t.id }}" style="text-align: center; display: none;">
                     <h5><b>Описание задачи</b></h5>

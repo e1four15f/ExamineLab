@@ -1,0 +1,111 @@
+{% extends 'main/header.html' %}
+
+{% block content %}
+    <div class="row">
+
+        {% include "main/includes/nav-menu-second.html" %}
+
+        <center>
+            <h3>
+                {% if task %}
+                    Изменить
+                {% else %}
+                    Добавить новое
+                {% endif %}    
+                    задание {{ task.title }}
+            </h3>
+        </center>
+
+        <div class="col s12 m10 offset-m1 l8 offset-l2">
+            <form method="POST" id="add-task">
+                {% csrf_token %}
+                {{ form.as_p }}
+
+                {% if task %}
+                    <div class="row">
+                        <div class="col s12">
+                            <ul class="tabs">
+                                {% for test in tests %}
+                                    <li class="tab col s3"><a href="#test-{{ test.id }}">{{ test.title }}</a></li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% for test in tests %}
+                            <div id="test-#{{ test.id }}" class="col s12">2312312</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </form>
+            
+            <p>
+                <a class="waves-effect waves-light btn modal-trigger" href="#new-test">Добавить тест</a>
+                <div id="new-test" class="modal">
+                    <div class="modal-content">
+                        <div class="row">
+                            <div class="col s12 m10 offset-m1 l8 offset-l2">
+                                <center>
+                                    <h4>Добавить новый тест</h4>
+                                </center>
+                                <form method="POST" id="add-test">
+                                    {% csrf_token %}
+                                    {{ test_form.as_p }}
+                                </form>
+                            </div>    
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <a href="#!" class="modal-close waves-effect waves-green btn-flat" onclick="$('#add-test').submit()">Добавить</a>
+                        <a href="#!" class="modal-close waves-effect waves-green btn-flat">Отмена</a>
+                    </div>
+                </div>
+            </p>
+            
+            <button class="btn" type="submit" form="add-task">
+                {% if task %}
+                    Изменить
+                {% else %}
+                    Добавить
+                {% endif %} 
+            </button>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        $(document).ready(function(){
+            $('.tabs').tabs();
+            $('.modal').modal();
+            $('#id_rating').hide();
+            var stars = '<p id="stars"><a onclick="set_rating(0)"><i class="material-icons" style="color: gray; cursor: pointer;">cancel</i></a>';
+            for (i = 1; i < 6; i++) {
+                stars += '<a onclick="set_rating(' + i + ')"><i class="material-icons" style="color: gray; cursor: pointer;">star</i></a>';
+            }
+            stars += '</p>';
+            $('#id_rating').parent().append(stars);
+            $('#stars > a > i').first().css('margin-right', '20px');
+            $('#stars').css({'margin-top': '5px'});
+            
+            {% if task %}
+                var saved_rating = {{ form.rating.value|default_if_none:"" }};
+                set_rating(saved_rating);
+            {% endif %} 
+        });
+
+        function set_rating(rating) {
+            $('#id_rating').val(rating);
+            $('#stars > a > i').slice(0, 6).css('color', 'gray');
+            if (rating == 0) {
+                $('#stars > a > i').first().css('color', 'red');
+            } else {
+                $('#stars > a > i').slice(1, rating + 1).css('color', 'orange');
+            }
+        }
+    </script>
+    
+    <style>
+        #stars > a > i:hover {
+            color: #ee6e73 !important; 
+        }    
+    </style>
+{% endblock %}

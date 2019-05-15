@@ -28,7 +28,7 @@
 
         <a href="{{ c.id }}">
             <div class="card hoverable 
-                {% if c.id in completed_courses %}
+                {% if c.id|is_completed:user %}
                     green
                 {% else %}
                     blue-grey
@@ -40,7 +40,9 @@
                     <p style="font-style: italic; float: right;">Автор: {{ c.author.first_name }} {{ c.author.last_name }}</p>
                 </div>
                 <div class="card-action">
-                    {% if c in user_courses %}
+                    {% if c.id|is_completed:user %}
+                        <a>Вы прошли этот курс</a>
+                    {% elif c in user_courses %}
                         <a href="#" onclick="check({{ c.id }}, true)">Покинуть</a>
                     {% else %}
                         <a href="#" onclick="check({{ c.id }}, false)">Записаться</a>
@@ -52,4 +54,10 @@
     {% if forloop.counter|divisibleby:2 %}
         </div>
     {% endif %}
+
+    <script>
+         $(document).ready(function(){
+            $('.modal').modal();
+        });
+    </script>
 {% endfor %}

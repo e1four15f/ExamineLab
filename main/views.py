@@ -4,11 +4,12 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
 from django.forms.models import model_to_dict
-from .forms import NewUserForm, AddCourseForm, AddTaskForm, EditorSubmitForm, UploadCodeForm, SelectLanguageForm
-from .models import Course, Task, Test, Language, User
+from .forms import NewUserForm, AddCourseForm, AddTaskForm, EditorSubmitForm, UploadCodeForm, SelectLanguageForm, CustomAuthForm, AddTestForm
+from .models import Course, Task, Test, Language, User, Statistics
 
 from modules.Tests import testReciever 
 from modules.Containers.client import send_request
+from datetime import datetime, timedelta
 import os
 
 
@@ -22,9 +23,24 @@ def profile(request):
         request.user.avatar.save(image.name, image)
         return HttpResponse()
     else:
+        stats = Statistics.objects.filter(user=request.user)
+        today = datetime.now()
+        stats = stats.filter(date__range=[today - timedelta(days=60), today])
+        
+        dates = [today - timedelta(days=x) for x in range(60, -1, -1)]
+        extended_stats = []
+        for date in dates:
+            day_stats = stats.filter(date=date).first()
+            extended_stats.append({
+                'date': date.strftime('%d %b'), 
+                'sends': day_stats.sends if day_stats else 0, 
+                'completed_tasks': day_stats.completed_tasks if day_stats else 0,
+            })
+        
         return render(request=request,
                       template_name='main/profile.html',
-                      context={'user': request.user})
+                      context={'user': request.user,
+                               'stats': extended_stats})
 
 
 def single_slug(request, single_slug):
@@ -97,13 +113,21 @@ def task_single_slug(request, single_slug, task_single_slug):
                 completed_tasks = request.user.completed_tasks.all().filter(course=course.id)
                 course_tasks = Task.objects.filter(course=course.id)
 
-                if set(completed_tasks) == set(course_tasks):
-                    request.user.completed_courses.add(course)
-                    # TODO Удалить m2m референс, не сам курс
-                    #completed_course = request.user.courses.all().get(id=course.id)
-                    #completed_course.clear()
+                try:
+                    completed_tasks_stats = Statistics.objects.get(date=datetime.now(), user=request.user)
+                    completed_tasks_stats.completed_tasks += 1
+                except:
+                    completed_tasks_stats = Statistics(date=datetime.now(), completed_tasks=1, user=request.user)
+                completed_tasks_stats.save()
 
+                if set(completed_tasks) == set(course_tasks):
+                    completed_course = request.user.participation_set.get(course_id=course.id)
+                    completed_course.completed = True
+                    completed_course.save()
                     completed_course = True
+                    #TODO Для прохождения курсов?
+                    #stats = Statistics.objects.filter(user=request.user)
+                    #stats = stats.filter(date=[datetime.now() - timedelta(days=90), datetime.now()])
             
             public_outs = outs[:len(public_tests)]
             public_tests = public_tests.values()
@@ -111,11 +135,18 @@ def task_single_slug(request, single_slug, task_single_slug):
                 test['result'] = out[0]
                 test['error'] = out[1]
             
+            try:
+                sends_stats = Statistics.objects.get(date=datetime.now(), user=request.user)
+                sends_stats.sends += 1
+            except:
+                sends_stats = Statistics(date=datetime.now(), sends=1, user=request.user)
+            sends_stats.save()
+            
             return render(request=request,
                           template_name='main/includes/tests.html',
                           context={'tests': public_tests,
-                                  'passed': passed,
-                                  'completed_course': completed_course})
+                                   'passed': passed,
+                                   'completed_course': completed_course})
         else:
             editor_submit_form = EditorSubmitForm()
             return render(request=request,
@@ -151,11 +182,11 @@ def courses(request):
     courses = Course.objects.all()
     if request.is_ajax():
         if 'filters' in request.POST:
-            user_completed_courses = [c.id for c in request.user.completed_courses.all()]
             if 'completed_courses' in request.POST:
                 completed_courses = bool(request.POST['completed_courses'])
                 if completed_courses:
-                    courses = courses.filter(pk__in=user_completed_courses)
+                    user_completed_courses = request.user.participation_set.filter(completed=True)
+                    courses = [c.course for c in user_completed_courses]
 
             if 'enrolled_courses' in request.POST:
                 enrolled_courses = bool(request.POST['enrolled_courses'])
@@ -176,8 +207,8 @@ def courses(request):
             return render(request=request,
                           template_name='main/includes/courses-panel.html',
                           context={'courses': courses,
-                                   'user_courses': request.user.courses.all(),
-                                   'completed_courses': user_completed_courses})  
+                                   'user_courses': request.user.courses.all()})
+
 
         course_id = request.POST['course_id']
         if 'in_course' in request.POST: 
@@ -186,7 +217,8 @@ def courses(request):
             
             if in_course:
                 request.user.remove_course(selected_course)
-                # TODO Удалить историю участия в курсе
+                tasks = request.user.completed_tasks.all().filter(course_id=course_id)
+                [request.user.completed_tasks.remove(t) for t in tasks]
                 print(f'{request.user} покинул курс {selected_course}')
             else:
                 request.user.add_course(selected_course)
@@ -197,15 +229,17 @@ def courses(request):
         else:
             print(f'Удаление курса {course_id}')
             selected_course = Course.objects.get(id=course_id)
+
+            if selected_course.author != request.user and not request.user.is_superuser:
+                return redirect('ExamineLab:courses')
+
             selected_course.delete()
             return HttpResponse()  
 
-    completed_courses = [c.id for c in request.user.completed_courses.all()]
     return render(request=request,
                   template_name='main/courses.html',
                   context={'courses': courses, 
-                           'user_courses': request.user.courses.all(),
-                           'completed_courses': completed_courses})
+                           'user_courses': request.user.courses.all()})
 
 
 def register(request):
@@ -236,7 +270,7 @@ def logout_request(request):
 
 def login_request(request):
     if request.method == 'POST':
-        form = AuthenticationForm(request, request.POST)
+        form = CustomAuthForm(request, request.POST)
         if form.is_valid():
             username = form.cleaned_data.get('username')
             password = form.cleaned_data.get('password')
@@ -250,7 +284,7 @@ def login_request(request):
         else:
             messages.error(request, 'Неверный email или пароль')
 
-    form = AuthenticationForm()
+    form = CustomAuthForm()
     return render(request,
                   'main/login.html',
                   {'form': form})
@@ -297,6 +331,9 @@ def add_or_edit_course(request):
     elif request.path == '/edit_course/':
         course_id = request.GET['course_id']
         course = Course.objects.get(pk=course_id)
+
+        if course.author != request.user and not request.user.is_superuser:
+            return redirect('ExamineLab:courses')
     
         form = AddCourseForm(initial={'title': course.title,
                                       'summary': course.summary})
@@ -304,35 +341,87 @@ def add_or_edit_course(request):
         return render(request=request,
                       template_name='main/add_or_edit_course.html',
                       context={'form': form,
-                              'course': course})
-
-
+                               'course': course})
 
 
 def add_or_edit_task(request):
     if request.user.is_anonymous:
         return redirect('ExamineLab:register')
+    
+    course_id = request.GET['course_id']
+    course = Course.objects.get(pk=course_id)
+    if request.method == 'POST':
+        if 'rating' in request.POST:
+            form = AddTaskForm(request, request.POST)
+            title = request.POST['title']
+            summary = request.POST['summary']
+            rating = request.POST['rating']
+            solution = request.POST['solution']
+            
+            if request.path == '/add_task/':
+                new_task = Task(title=title, summary=summary, rating=rating, 
+                                    solution=solution, course=course)
+                new_task.save()
+                messages.success(request, f'Добавлено новое задание {title}')
+                print(f'Добавлено новое задание {title}')
 
+            elif request.path == '/edit_task/':
+                task_id = request.GET['task_id']
+                selected_task = Task.objects.get(pk=task_id)
+                selected_task.title = title
+                selected_task.summary = summary
+                selected_task.rating = rating
+                selected_task.solution = solution
+                selected_task.save()
+                messages.info(request, f'Обновлёно задание {title}')
+                print(f'Обновлёно задание {title}')
+        
+        #else:
+        #    form = AddTaskForm(request, request.POST)
+        #    title = request.POST['title']
+        #    input = request.POST['input']
+        #    output = request.POST['output']
+        #    #public = request.POST['public']
+#
+        #    if request.path == '/edit_task/':
+        #        new_test = Test(title=title, input=input, output=output, 
+        #                        task=task, public=False)
+        #        new_test.save()
+        #        messages.success(request, f'Добавлен новый тест {title}')
+        #        print(f'Добавлен новый тест {title}')
+        #    elif request.path == '/edit_task/':
+        #        pass
+
+        return redirect(f'../courses/{course.id}')
+    
     if request.path == '/add_task/':
-        course_id = request.GET['course_id']
-        course = Course.objects.get(pk=course_id)
+        form = AddTaskForm()
+        test_form = AddTestForm()
+        return render(request=request,
+                      template_name='main/add_or_edit_task.html',
+                      context={'form': form,
+                               'test_form': test_form,
+                               'course': course})
 
-        if request.user.is_superuser:
-            if request.method == 'POST':
-                form = AddTaskForm(request, request.POST)
-                # TODO добавить в бд
-                pass
-
-            form = AddTaskForm()
-            return render(request=request,
-                          template_name='main/add_task.html',
-                          context={'course': course,
-                                   'form': form})
-
-        return HttpResponseNotFound()
     elif request.path == '/edit_task/':
-        # TODO 
-        pass
+        if course.author != request.user and not request.user.is_superuser:
+            return redirect(f'../courses/{course.id}')
+
+        task_id = request.GET['task_id']
+        task = Task.objects.get(pk=task_id)
+        form = AddTaskForm(initial={'title': task.title,
+                                    'summary': task.summary,
+                                    'rating': task.rating,
+                                    'solution': task.solution})
+        #TODO
+        test_form = AddTestForm()
+        return render(request=request,
+                      template_name='main/add_or_edit_task.html',
+                      context={'form': form,
+                               'test_form': test_form,
+                               'course': course,
+                               'task': task,
+                               'tests': Test.objects.filter(task=task)})
 
 
 def roles(request):
