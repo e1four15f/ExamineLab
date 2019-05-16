@@ -2,10 +2,10 @@
 
 
 {% block content %}
-    <div class="row">
-        
-        {% include "main/includes/nav-menu-second.html" %}        
 
+    {% include "main/includes/nav-menu-second.html" %}
+    
+    <div class="row">
         <div class="col s8 offset-s2">
             <center>
                 <h3>{{ task.title }}</h3>
@@ -13,6 +13,8 @@
             </center>
         </div>
     </div>
+
+    <hr style="margin-top: 30px; border: 1px solid #ee6e73; margin-bottom: 40px;">
 
     <div class="row">
         <div class="col s2">
@@ -70,6 +72,11 @@
                 {% include "main/includes/editor.html" with language="python" %}  
             </div>
         </form>
+    </div>
+
+    <hr style="margin-top: 10px; border: 1px solid #ee6e73; margin-bottom: 20px;">
+    
+    <div class="row">    
         <div id="tests">{% include "main/includes/tests.html" %}</div>
         
         <div class="input-field col s12">

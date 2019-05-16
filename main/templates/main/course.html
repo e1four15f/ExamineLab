@@ -1,10 +1,10 @@
 {% extends 'main/header.html' %}
 
 {% block content %}
+
+    {% include "main/includes/nav-menu-first.html" %}    
+
     <div class="row">
-
-        {% include "main/includes/nav-menu-first.html" %}
-
         <div class="col s8">
             <h2 style="display: inline-block" class="card-title">{{ course.title }}</h2>
             {% if user.is_superuser or course.author == user %}    
@@ -55,11 +55,15 @@
                 <p id="in-course"><b>Вы участвуете!</b></p> 
             {% endif %}
         </div>
-
+        
         <div class="col s12 center-align">
             <h6>{{ course.summary }}</h6>
         </div>
-        
+    </div>
+    
+    <hr style="margin-top: -10px; border: 1px solid #ee6e73; margin-bottom: 40px;">
+    
+    <div class="row">
         <div class="col s12 m6 l6 xl5">    
             <ul style="text-align: center;"> 
                 {% for t in tasks %}
