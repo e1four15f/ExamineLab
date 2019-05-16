@@ -23,7 +23,12 @@ def profile(request):
         request.user.avatar.save(image.name, image)
         return HttpResponse()
     else:
-        stats = Statistics.objects.filter(user=request.user)
+        profile_user = request.user
+        if request.GET:
+            user_id = request.GET['user_id']
+            profile_user = User.objects.get(pk=user_id)
+
+        stats = Statistics.objects.filter(user=profile_user)
         today = datetime.now()
         stats = stats.filter(date__range=[today - timedelta(days=60), today])
         
@@ -40,6 +45,7 @@ def profile(request):
         return render(request=request,
                       template_name='main/profile.html',
                       context={'user': request.user,
+                               'profile_user': profile_user,
                                'stats': extended_stats})
 
 
@@ -292,7 +298,7 @@ def login_request(request):
 
 def error_404(request):
     return render(request=request,
-                  template_name='main/404.html')
+                  template_name='404.html')
 
 
 def add_or_edit_course(request):

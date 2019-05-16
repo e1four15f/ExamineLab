@@ -5,6 +5,7 @@ import subprocess
 import signal
 
 from modules.Tests import testVerification as verification
+from threading import Thread, Event
 
 
 def load_from(path2load, preproc = None, dir = True):
@@ -59,36 +60,70 @@ class TestReciever:
         for path in paths:
             yield self.get_test_by_path(path, preproc)
 
-    def spawn_user_proc(self, uinput)-> tuple:
+    def spawn_user_proc(self, uinput, timeout)-> tuple:
+        proc = None 
+        def out_of_time(signum, frame):
+            raise RuntimeError('Out of time')
 
-        proc = subprocess.run(self.launch_command, input = uinput, stdout = subprocess.PIPE, stderr = subprocess.PIPE, encoding='utf-8', shell = True)
+        signal.signal(signal.SIGALRM, out_of_time)
+        signal.alarm(timeout)
+        proc = subprocess.run(self.launch_command,
+                              timeout,
+                              input = uinput,
+                              stdout = subprocess.PIPE, 
+                              stderr = subprocess.PIPE, 
+                              encoding='utf-8', 
+                              shell = True)
+
+        signal.signal(signal.SIG_IGN, lambda s,f: s)
+        signal.alarm(0)
+
         print(f'in spawn_user_proc -- {proc.stdout} -- {proc.args}')
         
         return (proc.stdout, proc.stderr)
 
 
-    def perform_testing(self, tests, test_preproc = None, input_preproc = None):
+    def perform_testing(self, tests, timeout,  test_preproc = None, input_preproc = None, user_preproc = lambda out: out):
         
-        output = [re.sub(r'\r', '', test['output']) + '\n' for test in tests]
-        inputs = [re.sub(r'\r', '', test['input']) for test in tests]
-      
-        program_outs = [self.spawn_user_proc(pr_input)
-                            for pr_input in inputs]
-            
+        output = None
+        inputs = None
+        program_outs = None 
+
+        if test_preproc is None:
+            output = [re.sub(r'\r', '', test['output']) for test in tests]
+        else:
+            output = [re.sub(r'\r', '', test_preproc(test['output'])) for test in tests]
         
+        if input_preproc is None:
+            inputs = [re.sub(r'\r', '', test['input']) for test in tests]
+        else:
+            inputs = [re.sub(r'\r', '', input_preproc(test['input'])) for test in tests]
+
         passed = {}
         print(f'program inputs: {inputs}')
         print(f'program outs  : {program_outs}')
 
+        try:
+            program_outs = [self.spawn_user_proc(pr_input, timeout)
+                            for pr_input in inputs]
+        except RuntimeError:
+            for i in range(len(output)):
+                passed[tests[i]['id']] = False 
+            return (passed, [('', f'Время выполнения программы превысило {timeout} сек.')]*len(output))
+
+        
+        print(f'program inputs: {inputs}')
+        print(f'program outs  : {program_outs}')
         print(f'tests         : {output}')
-        for i, b in verification.verifyMultiple([stdout[0] for stdout in program_outs], output):
+
+        for i, b in verification.verifyMultiple([user_preproc(stdout[0]) for stdout in program_outs], output):
             passed[tests[i]['id']] = b
             print('tests: ', tests[i]['title'], i, passed[tests[i]['id']])
             
         return (passed, program_outs)
 
 
-def perform_testing_from_text(user_pr_text, tests, language, test_preproc = None, input_preproc = None):
+def perform_testing_from_text(user_pr_text, tests, language, test_preproc = None, input_preproc = None, user_preproc = None, timeout = 2):
     lang = language['extention']
     launch_command = language['launch_command_linux']
     optargs = language['optional_linux']
@@ -106,7 +141,7 @@ def perform_testing_from_text(user_pr_text, tests, language, test_preproc = None
     optargs = re.sub(r'<path>', abspath_wo_ext, optargs)
 
     test_checker = TestReciever(launch_command)
-    tests_result, outs = test_checker.perform_testing(tests, test_preproc, input_preproc)
+    tests_result, outs = test_checker.perform_testing(tests, timeout, test_preproc, input_preproc, user_preproc)
 
     subprocess.run(optargs, shell = True)
     return (tests_result, outs)

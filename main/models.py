@@ -74,7 +74,7 @@ class User(AbstractUser):
     
     avatar = models.ImageField(null=True, blank=True)
     #USERNAME_FIELD = 'email'
-    #objects = UserManager()
+    objects = UserManager()
     #REQUIRED_FIELDS = []
 
     #def has_permission_group(self, permission_group, course=None):

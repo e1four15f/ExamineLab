@@ -11,6 +11,7 @@
                     <th>Студент</th>
                     <th>Преподаватель</th>
                     <th>Администратор</th>
+                    <th>Профиль</th>
                 </tr>
             </thead>
     
@@ -49,6 +50,9 @@
                                 <span></span>
                             </label>
                         </td>
+                        <td>
+                            <a href="../profile?user_id={{ user.pk }}"><i class="material-icons roles-icons">rate_review</i></a> 
+                        </td>
                     </tr>
                 {% endfor %}
             </tbody>
@@ -78,6 +82,9 @@
     <style>
         th, td {
             text-align: center;
+        }
+        .roles-icons {
+            color: #26a69a;
         }
     </style>
 {% endblock %}

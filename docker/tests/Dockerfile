@@ -24,3 +24,6 @@ RUN alias python3="python3.7"
 # JavaScript
 RUN apt-get install -y npm	
 RUN apt-get install -y nodejs
+
+#Java
+RUN apt-get install openjdk-7-jre

@@ -4,7 +4,7 @@
 {% block content %}
     <div class="row" style="margin-top: 20px;">
         <div class="col s4 center-align">
-            <h5>{{ user.first_name }} {{ user.last_name }}</h5>
+            <h5>{{ profile_user.first_name }} {{ profile_user.last_name }}</h5>
             <form id="load-avatar-form" method="post" enctype="multipart/form-data" onchange="$(this).submit()">
                 {% csrf_token %}
                 <input id="load-avatar" type="file" name="avatar" accept="image/*" style="visibility: hidden"/> 
@@ -12,13 +12,13 @@
                     <!-- TODO Аватарки сжимаются под размер -->
                     <img onclick="$('#load-avatar').trigger('click')" class="responsive-img"
                     {% if user.avatar %}
-                        src="../{{ user.avatar.url }}">
+                        src="../{{ profile_user.avatar.url }}">
                     {% else %}
                         src="{% static 'main/images/nopic.jpg' %}"/>
                     {% endif %}
                 </a>
             </form>
-            <p>{{ user.email }}</p>
+            <p>{{ profile_user.email }}</p>
         </div>
 
         <div class="col s8">
@@ -37,7 +37,7 @@
             
             <div class="row">
                 <div id="active" class="col s12">
-                    {% for p in user.participation_set.all|get_completed:False %}
+                    {% for p in profile_user.participation_set.all|get_completed:False %}
                         {% if forloop.counter|divisibleby:2 %}
                             <div class="row" style="margin-bottom: 0px">
                         {% endif %}
@@ -49,7 +49,7 @@
                                         <p>{{ p.course.summary|truncatechars:100 }}</p>
                                         <p style="float:right; font-style:italic;">{{ p.date_joined }}</p>
                                         <br>
-                                        {% with p.course.id|get_course_progress:user.completed_tasks.all as progress %}
+                                        {% with p.course.id|get_course_progress:profile_user.completed_tasks.all as progress %}
                                             <p>Прогресс: {{ progress.completed }}/{{ progress.all }}</p> 
                                             <div class="progress">
                                                 <div class="determinate" 
@@ -68,7 +68,7 @@
                 </div>
             
                 <div id="completed" class="col s12">
-                    {% for p in user.participation_set.all|get_completed:True %}
+                    {% for p in profile_user.participation_set.all|get_completed:True %}
                         {% if forloop.counter|divisibleby:2 %}
                             <div class="row" style="margin-bottom: 0px">
                         {% endif %}

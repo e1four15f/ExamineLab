@@ -26,7 +26,8 @@ def start_listening(ip, port, buffer_size=8192):
                     break
                 data = pickle.loads(data)
                 logging.info(f'Recived data: {data}, {type(data)}, {sys.getsizeof(data)} bytes')
-                passed, outs = testReciever.perform_testing_from_text(data['user_code'], data['tests'], data['language'])
+                passed, outs = testReciever.perform_testing_from_text(data['user_code'], data['tests'], data['language'], 
+                                        test_preproc = lambda t: t.replace('\n',''), user_preproc = lambda t: t.replace('\n',''))
                 response = passed, outs
                 response = pickle.dumps(response)
                 client.send(response)
