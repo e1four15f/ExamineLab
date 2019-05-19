@@ -16,34 +16,11 @@
         <div class="col s2">
             {% if user.is_superuser or course.author == user %}
                 <a id="participants-btn" href="#participants-modal" 
-                        class="waves-effect waves-light btn modal-trigger">Участники</a>
+                        class="waves-effect waves-light btn modal-trigger"
+                        onclick="update_participants()">Участники</a>
                  
                 <div id="participants-modal" class="modal">
-                    <div class="modal-content">
-                        <h4>Участники курса</h4>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Имя</th>
-                                    <th>Фамилия</th>
-                                    <th>Email</th>
-                                </tr>
-                            </thead>
-                    
-                            <tbody>
-                                {% for user in participants_users %}
-                                    <tr>
-                                        <td>{{ user.first_name }}</td>
-                                        <td>{{ user.last_name }}</td>
-                                        <td>{{ user.email }}</td>
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="modal-footer">
-                        <a href="#!" class="modal-close waves-effect waves-green btn-flat">Закрыть</a>
-                    </div>
+                    {% include "main/includes/participants-modal.html" %}
                 </div>
             {% endif %}
         </div>
@@ -179,6 +156,19 @@
             $('div.col ul > li > div.collapsible-header').removeClass('selected-task');
             $('#task-' + task_id + '> div.collapsible-header').addClass('selected-task');
         }
+        
+        function update_participants() {
+            var data = "&csrfmiddlewaretoken={{ csrf_token }}"
+                        + "&update_participants=";
+            $.ajax({
+                url: '#',
+                method: 'POST',
+                data: data,
+                success: function(response) {
+                    $('#participants-modal').empty().append(response);
+                }
+            });
+        }
     </script>
     
     <style>
@@ -186,7 +176,7 @@
             color: white;
             padding: 0rem 0.4rem;
         }
-        #participants-btn {
+        #participants-btn, #add-participants-btn {
             margin-top: 50px;
         }
         #enroll-btn {

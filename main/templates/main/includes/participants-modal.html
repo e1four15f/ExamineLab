@@ -1,0 +1,64 @@
+<div class="modal-content">
+    <hr style="border: 1px solid #ee6e73;">
+
+    <div class="row" style="padding: 0 50px;">
+        <form id="search-form">
+            {% csrf_token %}
+            <center><h5>Поиск</h5></center>
+            <p class='filter-block'> 
+                <label>Имя</label>
+                <input name="first_name" type="text" onkeyup="$('#search-form').submit()">
+            </p>
+            <p class='filter-block'>
+                <label>Фамилия</label>
+                <input name="last_name" type="text" onkeyup="$('#search-form').submit()">
+            </p>
+            <p class='filter-block'>
+                <label>Email</label>
+                <input name="email" type="text" onkeyup="$('#search-form').submit()">
+            </p>
+            <p class='filter-block-checkbox'>
+                <label>
+                    <input name="is_participant" class="filled-in" type="checkbox" onchange="$('#search-form').submit()"/>
+                    <span>Участвует</span>
+                </label>
+            </p>
+        </form>
+    </div>
+    
+    <hr style="margin-top: -30px; border: 1px solid #ee6e73; margin-bottom: 25px;">
+    
+    <div id="users-table" class="row">
+        {% include "main/includes/participants-modal-table.html" %}
+    </div>
+</div>
+
+<div class="modal-footer">
+    <a href="#!" class="modal-close waves-effect waves-green btn-flat">Закрыть</a>
+</div>
+
+<style>
+    .filter-block, .filter-block-checkbox {
+        width: 28% !important;
+        float: left;
+        padding: 0px 10px;
+    }
+    .filter-block-checkbox{
+        width: 5% !important;
+        margin-top: 40px;
+    }
+</style>
+
+<script>
+    $('#search-form').submit(function(e) {
+        e.preventDefault();
+        var data = $('#search-form').serialize();
+        $.ajax({
+            method: 'POST',
+            data: data,
+            success: function(response) {
+                $('#users-table').empty().append(response);
+            }
+        });
+    });
+</script>

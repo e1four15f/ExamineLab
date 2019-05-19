@@ -80,7 +80,7 @@
         <div id="tests">{% include "main/includes/tests.html" %}</div>
         
         <div class="input-field col s12">
-            {% if user.is_superuser %}
+            {% if user.is_superuser or course.author == user %}
                 <h4>Решение задачи</h4>
                 <button onclick="foo_codemirror.setValue($('#copy-solution').text())">Скопировать решение в редактор</button>
                 <div style="border: 1px solid gray; padding: 5px;">

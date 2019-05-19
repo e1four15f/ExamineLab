@@ -11,7 +11,7 @@
                 <a href="#">
                     <!-- TODO Аватарки сжимаются под размер -->
                     <img onclick="$('#load-avatar').trigger('click')" class="responsive-img"
-                    {% if user.avatar %}
+                    {% if profile_user.avatar %}
                         src="../{{ profile_user.avatar.url }}">
                     {% else %}
                         src="{% static 'main/images/nopic.jpg' %}"/>

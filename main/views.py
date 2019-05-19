@@ -53,31 +53,70 @@ def single_slug(request, single_slug):
     if request.user.is_anonymous:
         return redirect('ExamineLab:register')
 
+    course = Course.objects.get(pk=int(single_slug))
     if request.is_ajax():
-        if 'task_id' in request.POST:
+        if 'user_id' in request.POST:
+            user_id = request.POST['user_id']
+            is_participant = bool(request.POST['is_participant'])
+
+            user = User.objects.get(pk=user_id)
+            if is_participant:
+                user.remove_course(course)
+            else:
+                user.add_course(course)
+                
+            return HttpResponse()
+
+        elif 'first_name' in request.POST:
+            first_name = request.POST['first_name']
+            last_name = request.POST['last_name']
+            email = request.POST['email']
+            is_participant = request.POST.get('is_participant')
+
+            users = User.objects.all()
+            if first_name:
+                users = users.filter(first_name__contains=first_name)
+            if last_name:
+                users = users.filter(last_name__contains=last_name)
+            if email:
+                users = users.filter(email__contains=email)
+            if is_participant:
+                users = users.filter(courses__in=[course])
+
+            participants_users = User.objects.filter(courses__in=[course])
+            return render(request=request,
+                          template_name='main/includes/participants-modal-table.html',
+                          context={'participants_users': participants_users,
+                                   'users': users})
+
+
+        elif 'update_participants' in request.POST:
+            participants_users = User.objects.filter(courses__in=[course])
+            return render(request=request,
+                          template_name='main/includes/participants-modal.html',
+                          context={'participants_users': participants_users,
+                                   'users': User.objects.all()})
+
+        elif 'task_id' in request.POST:
             task_id = request.POST['task_id']
             print(f'Удаление задания {task_id}')
             selected_task = Task.objects.get(id=task_id)
             selected_task.delete()
             return HttpResponse()
 
-        course = Course.objects.get(pk=int(single_slug))
         request.user.add_course(course)
         print(f'{request.user} записался на курс {course}')
         return HttpResponse()
     
-    course = Course.objects.get(pk=int(single_slug))
     tasks = Task.objects.filter(course__id=course.id).order_by('rating')
     completed_tasks = [t.id for t in request.user.completed_tasks.all()]
-
-    participants_users = User.objects.filter(courses__in=[course])
     return render(request=request,
                   template_name='main/course.html',
                   context={'course': course,
                            'tasks': tasks,
                            'user_courses': request.user.courses.all(),
                            'completed_tasks': completed_tasks,
-                           'participants_users': participants_users})
+                           'users': User.objects.all()})
 
 
 def task_single_slug(request, single_slug, task_single_slug):
