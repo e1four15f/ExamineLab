@@ -1,0 +1,70 @@
+<table>
+    <thead>
+        <tr>
+            <th>Имя</th>
+            <th>Фамилия</th>
+            <th>Email</th>
+            <th>Пригласить</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for user in users %}
+            <tr>
+                <td>{{ user.first_name }}</td>
+                <td>{{ user.last_name }}</td>
+                <td>{{ user.email }}</td>
+                {% if user in participants_users %}
+                    <td>
+                        <a href="#" id="user-{{ forloop.counter }}" class="waves-effect waves-light btn red" onclick="set_participation(this.id, '{{ user.pk }}', true)">
+                            <i class="material-icons">remove</i>
+                        </a>
+                    </td>
+                {% else %}
+                    <td>
+                        <a href="#" id="user-{{ forloop.counter }}" class="waves-effect waves-light btn" onclick="set_participation(this.id, '{{ user.pk }}', false)">
+                            <i class="material-icons">add</i>
+                        </a>
+                    </td>
+                {% endif %}
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<script>
+    function set_participation(el, user_id, is_participant) {
+        var data = "user_id=" + user_id 
+                    + "&csrfmiddlewaretoken={{ csrf_token }}"
+                    + "&is_participant=" + (is_participant ? '1' : '');
+        
+        $.ajax({
+            method: 'POST',
+            data: data,
+            success: function(response) {
+                if (is_participant) {
+                    M.toast({html: `Из курса удалён ${user_id}!`,
+                            classes: 'red',
+                            display_length: 1000});
+ 
+                    $('#' + el + ' > i').text('add');
+                    $('#' + el).removeClass('red');
+                } else {
+                    M.toast({html: `В курс добавлен ${user_id}!`,
+                            classes: 'green',
+                            display_length: 1000});
+
+                    $('#' + el + ' > i').text('remove');
+                    $('#' + el).addClass('red');
+                }
+                $('#' + el).attr('onclick',`set_participation(this.id, '${user_id}', ${!is_participant})`);
+            }
+        });
+    }
+</script>
+
+<style>
+    th, td {
+        text-align: center;
+    }
+</style>

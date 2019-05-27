@@ -1,34 +1,23 @@
+
+{% load static %}
 <nav>
     <div class="nav-wrapper">
-        {% if user.is_authenticated  %}
-            <a href="/courses" class="brand-logo center">ExamineLab</a>
-        {% else %}
-            <a href="/" class="brand-logo center">ExamineLab</a>
-        {% endif %}
+        <a href="/courses" class="brand-logo center">
+            <img src="{% static 'main/images/large_logo_white.png' %}" style="height: 30px; margin-top: 15px;">
+        </a>
         <a href="#" data-target="mobile-demo" class="sidenav-trigger">
             <i class="material-icons" style="font-size: 30px">menu</i>
         </a>
+        
         <ul id="nav-mobile" class="right hide-on-med-and-down">
-            {% if user.is_authenticated  %}
-                <li><a href="/profile">{{ user.username }}</a></li>
-                <li><a href="/logout">Logout</a></li>
-            {% else %}
-                <li><a href="/register">Register</a></li>
-                <li><a href="/login">Login</a></li>
-            {% endif %}
+            {% include "main/includes/navbar-buttons.html" %}
         </ul>
     </div>
 </nav>
 
 <ul class="sidenav" id="mobile-demo">
     <center><i class="material-icons" style="font-size: 30px">account_box</i></center>
-    {% if user.is_authenticated  %}
-        <li><a href="/profile">{{ user.username }}</a></li>
-        <li><a href="/logout">Logout</a></li>
-    {% else %}
-        <li><a href="/login">Login</a></li>
-        <li><a href="/register">Register</a></li>
-    {% endif %}
+    {% include "main/includes/navbar-buttons.html" %}
 </ul>
 
 <script>

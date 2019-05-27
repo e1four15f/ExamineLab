@@ -1,44 +1,93 @@
-<!DOCTYPE html>
-<html lang="en">
-
 <head>
-	<meta charset="utf-8">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-
-	<title>404 HTML Template by Colorlib</title>
-
-	<!-- Google font -->
-	<link href="https://fonts.googleapis.com/css?family=Montserrat:300,700" rel="stylesheet">
-
-	<!-- Custom stlylesheet -->
-	<link type="text/css" rel="stylesheet" href="css/style.css" />
-
-	<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-	<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-	<!--[if lt IE 9]>
-		  <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
-		  <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-		<![endif]-->
-
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
 </head>
+    
+<style>
+    .pink-text {
+        color: pink;
+    }
+    .blue-text {
+        color: blue;
+    }
+    .gray-text {
+        color: grey;
+    }
+    .upper-text {
+        text-transform: uppercase;
+    }
+    ul {
+        list-style-type: upper-alpha;
+    }
+    h1 {
+        font-weight: 500;
+        font-size: 280px;
+        margin: 0px;
+        height: 255px;
+        margin-top: -60px;
+    }
+    h2 {
+        font-weight: 500;
+        font-size: 38px;
+    }
+    #text-under {
+        font-size: 26px;
+        margin-bottom: 55px;
+    }
+    h3 {
+        font-weight: 400;
+        font-size: 24px;
+    }
+    .container {
+        margin-top: 40px;
+        width: 1250px;
+    }
+    p {
+        font-weight: 300;
+        font-size: 18px;
+        line-height: 22px;
+    }
+    img {
+        width: 100%;
+    }
+    ul {
+        margin-left: 22px;
+        list-style-type: disc !important
+    }
+    li {
+        list-style-type: disc !important
+    }
+    span {
+        display: inline-block;
+    }
+</style>
 
 <body>
-
-	<div id="notfound">
-		<div class="notfound">
-			<div class="notfound-404">
-				<h1>4<span></span>4</h1>
-			</div>
-			<h2>Oops! Page Not Be Found</h2>
-			<p>Sorry but the page you are looking for does not exist, have been removed. name changed or is temporarily unavailable</p>
-			
-			<p> Сука, а где стили</p>
-			<a href="#">Пойти нахуй (Back to homepage)</a>
-		</div>
-	</div>
-
-</body><!-- This templates was made by Colorlib (https://colorlib.com) -->
-
-</html>
+    <div class="container">
+        <div class="row">
+            <div class="col s6">
+                <center>
+                    <h2 class="pink-text upper-text">Страница не найдена</h2>
+                    <h1 class="pink-text">404</h1>
+                    <h2 id="text-under" class="pink-text upper-text">Нету такой... Честно... Я везде поискала</h2>
+                </center>
+                <p>Простите меня....то, что Вы просили - я не могу найти. Правда-правда. Не потому, что не искала, а потому, что не нашла. Может быть то, что Вы просили найти - вообще не существует... Наверное...</p>
+                <h3>Возможно, это случилось по одной из этих причин:</h3>
+                <ul>
+                    <li class="pink-text">Вы злой человек и заставили меня искать то, чего нет... <span class="gray-text">(неправильно набрали URL)</span></li>
+                    <li class="pink-text">Ищете то, что было ещё до меня, революции и динозавров...</li>
+                    <li class="pink-text">Вас обманули злые люди и дали неработающую ссылку...</li>
+                </ul>
+                <h3>Я действительно хочу Вам помочь... Попробуйте:</h3>
+                <ul>
+                    <li class="blue-text">Вернуться назад при помощи кнопки браузера back <span class="gray-text">(это такая стрелочка загнутая влево на самом верху)</span></li>
+                    <li class="blue-text">Ещё раз написать адрес страницы, может ошиблись...</li>
+                    <li class="blue-text">Перейти на главную страницу сайта</li>
+                </ul>
+            </div>
+            <div class="col s6">
+                {% load static %}
+                <img src="{% static 'main/images/anime.png' %}" alt="Аниме девка">
+            </div>
+        </div>
+    </div>
+</body>

@@ -1,7 +1,7 @@
 <head>
-    {% load static %}
+    {% load static %}  
     <!-- Compiled and minified Materialize CSS -->
-    <link href="{% static 'main/css/materialize.css' %}" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
     <link href="{% static 'main/css/custom.css' %}" rel="stylesheet">
     <!-- Materialize Icons -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
@@ -11,27 +11,43 @@
     <!-- Compiled and minified Materialize JavaScript -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
 
-    <link href="{% static 'CodeMirror/theme/material.css' %}" rel="stylesheet">
-    <link href="{% static 'CodeMirror/theme/eclipse.css' %}" rel="stylesheet">
-    <!-- monokai, dracula, blackboard -->
-    <link href="{% static 'CodeMirror/addon/scroll/simplescrollbars.css' %}" rel="stylesheet">
+    {% if editor_submit_form %}
+        <link href="{% static 'CodeMirror/theme/material.css' %}" rel="stylesheet">
+        <link href="{% static 'CodeMirror/theme/eclipse.css' %}" rel="stylesheet">
+        <link href="{% static 'CodeMirror/addon/scroll/simplescrollbars.css' %}" rel="stylesheet">
+    {% endif %}
+    <link href="{% static 'main/images/favicon.ico' %}" rel="shortcut icon" type="image/ico"/>
 </head>
 
 <style>
-body {
-    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-}
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    #background {
+        background-color: #EFEFEF;
+        display: flex;
+        flex-direction: column;
+        min-height: 93vh;
+    }
+    .container {
+        padding: 0px 60px;
+        background-color: white;
+        flex: 1;
+    }
 </style>
+
+{% block scripts %}
+{% endblock %}
 
 <body>
 
     {% include 'main/includes/navbar.html' %}
     {% include 'main/includes/messages.html' %}
 
-    <div class="container">
-        <br>
-        {% block content %}
-        {% endblock %}
+    <div id="background">
+        <div class="container z-depth-1">        
+            {% block content %}
+            {% endblock %}
+        </div>
     </div>
-
 </body>

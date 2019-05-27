@@ -19,6 +19,7 @@
                 <div class="collapsible-body">
                     <div class="row">
                         <center>
+                            <!-- TODO Текст вылезает за рамки -->
                             <div class="col s4">
                                 <h6>Входные данные</h6>
                                 <span style="white-space: pre-wrap">{{ test.input }}</span>
@@ -51,8 +52,14 @@
         {% if checks.passed_tests is checks.tests_count %}
             <script>
                 M.toast({html: 'Задание успешно пройдено!',
-                        classes: 'green',
-                        display_length: 2000})
+                                classes: 'green',
+                                display_length: 2000}) 
+                
+                {% if completed_course %}
+                    M.toast({html: 'Поздравляем, вы полностью прошли курс!',
+                                    classes: 'green',
+                                    display_length: 2000})     
+                {% endif %}
             </script>
         {% else %}
             <script>

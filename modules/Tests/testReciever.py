@@ -7,6 +7,7 @@ import signal
 from modules.Tests import testVerification as verification
 from threading import Thread, Event
 
+
 def load_from(path2load, preproc = None, dir = True):
     '''
     Returns generator to loaded files if *dir* is True. Else -- only file from path
@@ -99,6 +100,8 @@ class TestReciever:
             inputs = [re.sub(r'\r', '', input_preproc(test['input'])) for test in tests]
 
         passed = {}
+        print(f'program inputs: {inputs}')
+        print(f'program outs  : {program_outs}')
 
         try:
             program_outs = [self.spawn_user_proc(pr_input, timeout)

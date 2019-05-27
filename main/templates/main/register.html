@@ -1,12 +1,17 @@
 {% extends 'main/header.html' %}
 
 {% block content %}
-    <form  method="POST">
-        {% csrf_token %}
-        {{ form.as_p }}
+    <div class="row">
+        <center><h3>Регистрация</h3></center>
+        <div class="col s6 offset-s3">
+            <form  method="POST">
+                {% csrf_token %}
+                {{ form.as_p }}
 
-        <button class="btn" type="submit">register</button>
-    </form>
+                <button class="btn" type="submit">Зарегистрироваться</button>
+            </form>
 
-    If you already have an account <a href="/login">login</a> insted.
+            Если у вас уже есть аккаунт, то можете <a href="/login">войти</a> в него.
+        </div>
+    </div>
 {% endblock %}

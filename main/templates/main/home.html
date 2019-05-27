@@ -1,21 +1,119 @@
-{% extends 'main/header.html' %}
+<head>
+    {% load static %}
+    <!-- Compiled and minified Materialize CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
+    <!-- Compiled and minified JQuery -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <!-- Compiled and minified Materialize JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+</head>
 
-{% block content %}
-    <div class="row">
-        <div class="col s12">
-            <div class="card">
-                <div class="card-image">
-                    <img src="https://getcourse.com.au/wp-content/uploads/2017/10/study-online-at-home-1.jpg">
-                </div>
-                <div class="card-action">
-                    <a href="courses" class="waves-effect waves-light btn">Начать учиться!</a>
-                </div>
-                <div class="card-content">
-                    <p>I am a very simple card. I am good at containing small bits of information.
-                    I am convenient because I require little markup to use effectively.</p>
-                </div>
+<style>
+    #start-button {
+        position: absolute;
+        width: 400px;
+        height: 75px;
+        border-radius: 200px;
+        background-color: rgba(0,0,0, 0.4);
+        border: 3px solid #f1f1f1;
+        text-align: center;
+        font-size: 35px;
+        z-index: 1000;
+        bottom: 10%;
+        margin-left: auto;
+        margin-right: auto;
+        left: 0;
+        right: 0;
+        padding-top: 15px;
+    }
+    #start-button:hover {
+        background-color: rgba(140, 120, 220, 0.7);
+        box-shadow: -5px -5px 30px 5px red, 5px 5px 30px 5px blue;
+        font-size: 38px;
+    }
+    .slides {
+        width: 100% !important;
+        height: 100% !important;
+    }
+    .slider {
+        width: 100% !important;
+        height: 100% !important;
+    }
+    .slider .indicators {
+        bottom: 20px;
+    }
+    .caption {
+        color: white;
+        position: absolute;
+        border-radius: 20px;
+        background-color: rgba(0,0,0, 0.4);
+        border-top: 2px solid #f1f1f1;
+        border-bottom: 2px solid #f1f1f1;
+        z-index: 3;
+        padding: 20px;
+    }
+    h5 {
+        font-weight: bold;
+        text-shadow: #000 1px 0 5px;
+    }
+    h3 {
+        font-weight: bold;
+        text-shadow: #000 1px 0 5px;
+    }
+    img {
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+    }
+</style>
 
-            </div>
-        </div>
+<body>        
+    <div class="slider">
+        <ul class="slides">
+            <li>
+                <img src="{% static 'main/images/slider/1.jpg' %}"> 
+                <div class="caption center-align">
+                    <h3>This is our big Taglineslider-!</h3>
+                    <h5 class="light grey-text text-lighten-3">Here's our small slogan.</h5>
+                </div>
+            </li>
+            <li>
+                <img src="{% static 'main/images/slider/3.jpg' %}"> 
+                <div class="caption right-align">
+                    <h3>Right Aligned Caption</h3>
+                    <h5 class="light grey-text text-lighten-3">Here's our small slogan.</h5>
+                </div>
+            </li>
+            <li>
+                <img src="{% static 'main/images/slider/2.jpg' %}"> 
+                <div class="caption left-align">
+                    <h3>Left Aligned Caption</h3>
+                    <h5 class="light grey-text text-lighten-3">Here's our small slogan.</h5>
+                </div>
+            </li>
+            <li>
+                <img src="{% static 'main/images/slider/4.png' %}"> 
+                <div class="caption right-align">
+                    <h3>Left Aligned Caption</h3>
+                    <h5 class="light grey-text text-lighten-3">Here's our small slogan.</h5>
+                </div>
+            </li>
+            <li>
+                <img src="{% static 'main/images/slider/5.jpg' %}"> 
+                <div class="caption left-align">
+                    <h3>Right Aligned Caption</h3>
+                    <h5 class="light grey-text text-lighten-3">Here's our small slogan.</h5>
+                </div>
+            </li>
+        </ul>
     </div>
-{% endblock %}
+    <a id="start-button" href="courses" class="waves-effect waves-light btn">Начать учиться!</a>
+</body>
+
+<script>
+    $(document).ready(function(){
+        $('.slider').slider();
+    });
+</script>
+
+

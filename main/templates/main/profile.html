@@ -1,0 +1,185 @@
+{% extends 'main/header.html' %}
+
+{% load static %}
+{% block content %}
+    <div class="row" style="margin-top: 20px;">
+        <div class="col s4 center-align">
+            <h5>{{ profile_user.first_name }} {{ profile_user.last_name }}</h5>
+            <form id="load-avatar-form" method="post" enctype="multipart/form-data" onchange="$(this).submit()">
+                {% csrf_token %}
+                <input id="load-avatar" type="file" name="avatar" accept="image/*" style="visibility: hidden"/> 
+                <a href="#">
+                    <!-- TODO Аватарки сжимаются под размер -->
+                    <img onclick="$('#load-avatar').trigger('click')" class="responsive-img"
+                    {% if profile_user.avatar %}
+                        src="../{{ profile_user.avatar.url }}">
+                    {% else %}
+                        src="{% static 'main/images/nopic.jpg' %}"/>
+                    {% endif %}
+                </a>
+            </form>
+            <p>{{ profile_user.email }}</p>
+        </div>
+
+        <div class="col s8">
+            <div class="row">
+                <canvas id="stats" height="150"></canvas>
+            </div>
+            
+            <hr style="margin-top: 10px; border: 1px solid #ee6e73; margin-bottom: 20px;">
+
+            <div class="row">
+                <ul class="tabs">
+                    <li class="tab"><a href="#active" class="active">Активные курсы</a></li>
+                    <li class="tab"><a href="#completed">Завершенные курсы</a></li>
+                </ul>
+            </div>
+            
+            <div class="row">
+                <div id="active" class="col s12">
+                    {% for p in profile_user.participation_set.all|get_completed:False %}
+                        {% if forloop.counter|divisibleby:2 %}
+                            <div class="row" style="margin-bottom: 0px">
+                        {% endif %}
+                        <div class="col s6">
+                            <a href="/courses/{{ p.course.id }}">
+                                <div class="card blue-grey darken-1 hoverable">
+                                    <div class="card-content white-text">
+                                        <span class="card-title">{{ p.course.title }}</span>
+                                        <p>{{ p.course.summary|truncatechars:100 }}</p>
+                                        <p style="float:right; font-style:italic;">{{ p.date_joined }}</p>
+                                        <br>
+                                        {% with p.course.id|get_course_progress:profile_user.completed_tasks.all as progress %}
+                                            <p>Прогресс: {{ progress.completed }}/{{ progress.all }}</p> 
+                                            <div class="progress">
+                                                <div class="determinate" 
+                                                    style="width: {{ progress.percents }}%">
+                                                </div>
+                                            </div>
+                                        {% endwith %}
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        {% if forloop.counter|divisibleby:2 %}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            
+                <div id="completed" class="col s12">
+                    {% for p in profile_user.participation_set.all|get_completed:True %}
+                        {% if forloop.counter|divisibleby:2 %}
+                            <div class="row" style="margin-bottom: 0px">
+                        {% endif %}
+                        <div class="col s6">
+                            <a href="/courses/{{ p.course.id }}">
+                                <div class="card blue-grey darken-1 hoverable">
+                                    <div class="card-content white-text">
+                                        <span class="card-title">{{ p.course.title }}</span>
+                                        <p>{{ p.course.summary|truncatechars:100 }}</p>
+                                        <p style="float:right; font-style:italic;">{{ p.date_joined }}</p>
+                                        <br>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        {% if forloop.counter|divisibleby:2 %}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js"></script>
+
+    <script>
+        $(document).ready(function(){
+            $('.tabs').tabs();
+
+            $('#load-avatar-form').submit(function(e){
+                e.preventDefault();
+                var form = $(this);
+                var path = "{% static 'media' %}" + '/';
+
+                var data = new FormData(this)
+                var filename = data.get('avatar')['name']
+                $.ajax({
+                    url: form.attr("action"),
+                    method: form.attr("method"),
+                    data: data,
+                    cache: false,
+                    contentType: false,
+                    processData: false,
+                    success: function(response) {
+                        $('#load-avatar-form > a > img').attr('src', path + filename);
+                    }
+                });
+            });
+
+            var date = [];
+            var sends = [];
+            var completed_tasks = [];
+            {% for s in stats %}
+                date.push('{{ s.date }}');
+                sends.push('{{ s.sends }}');
+                completed_tasks.push('{{ s.completed_tasks }}');
+            {% endfor %}
+
+            var ctx = document.getElementById('stats').getContext('2d');
+            var myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: date,
+                    datasets: [{ 
+                        data: sends,
+                        label: "Посылок",
+                        borderColor: "#ee6e73",
+                        fill: true,
+                        backgroundColor: "rgba(238, 110, 115, 0.2)",
+                    }, { 
+                        data: completed_tasks,
+                        label: "Решенных задач",
+                        borderColor: "#4caf50",
+                        fill: true,
+                        backgroundColor: "rgba(76, 175, 80, 0.2)",
+                    }]
+                },
+                options: {
+                    title: {
+                        display: true,
+                        text: 'Активность'
+                    },
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero:true,
+                                userCallback: function(label, index, labels) {
+                                    // when the floored value is the same as the value we have a whole number
+                                    if (Math.floor(label) === label) {
+                                        return label;
+                                    }
+                                },
+                            }
+                        }]
+                    }
+                }
+            });
+        });               
+    </script>
+    
+    <style>
+        .responsive-img {
+            height: 300px !important;
+            width: 300px !important;
+        }
+        .progress .determinate {
+            background-color: #ee6e73 !important;
+        }
+    </style>
+{% endblock %}

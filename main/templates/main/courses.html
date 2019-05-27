@@ -2,41 +2,49 @@
 
 {% block content %}
     <div class="row">
-        <div class="col s8">
-            <div class="row">
-                {% for c in courses %}
-                    <div class="col s12">
-                        <a href="{{ c.id }}">
-                            <div class="card blue hoverable">
-                                <div class="card-content white-text">
-                                    <span class="card-title">{{ c.title }}</span>
-                                    <p>{{ c.summary|truncatechars:100 }}</p>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                {% endfor %}
-            </div>
+        <div class="col s12">
+            <h3 style="display: inline-block; margin-left: 10px;">Курсы</h3>
+            {% if user.is_superuser or user.is_staff %}    
+                <a href="../add_course" style="display: inline-block">
+                    <i class="material-icons green-text text-lighten-1">add_box</i>
+                </a>
+            {% endif %}
+        </div>
+    </div>
+    <hr style="margin-top: -30px; border: 1px solid #ee6e73; margin-bottom: 40px;">
+    <div class="row">
+        <div id="courses-panel" class="col s8">
+            {% include "main/includes/courses-panel.html" %}
         </div>
 
-        <div class="col s4">
+        <div class="col m4 xl3 offset-xl1">
             <div class="card">
                 <div class="card-content">
                     <p>
                         <label for="search">Поиск курсов</label>
-                        <input id="search" type="text" class="validate">
+                        <input id="search" type="text" class="validate" onkeyup="checkbox_filters()">
                     </p>
                     <br/>
                     <p>
                         <label>
-                            <input type="checkbox" class="filled-in"/>
+                            <input id="completed_courses" type="checkbox" class="filled-in" 
+                                    onchange="checkbox_filters()"/>
+                            <span>Пройденные курсы</span>
+                        </label>
+                    </p>
+                    <br/>
+                    <p>
+                        <label>
+                            <input id="enrolled_courses" type="checkbox" class="filled-in"
+                                    onchange="checkbox_filters()"/>
                             <span style="white-space: pre-wrap">Курсы, которые я прохожу</span>
                         </label>
                     </p>
                     <br/>
                     <p>
                         <label>
-                            <input type="checkbox" class="filled-in"/>
+                            <input id="my_courses" type="checkbox" class="filled-in"
+                                    onchange="checkbox_filters()"/>
                             <span>Мои курсы</span>
                         </label>
                     </p>
@@ -44,4 +52,94 @@
             </div>
         </div>
     </div>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        $(document).ready(function(){
+            $('.modal').modal();
+        });
+                
+        function check(course_id, in_course) {
+            var data = "course_id=" + course_id 
+                        + "&in_course=" + (in_course ? '1' : '')
+                        + "&csrfmiddlewaretoken={{ csrf_token }}";
+            $.ajax({
+                url: '#',
+                method: 'POST',
+                data: data,
+                success: function(response) {
+                    var link = $(`#course-${course_id} > div > div > a:nth-child(2)`);
+                    link.attr('onclick', `check(${course_id}, ${!in_course})`);
+                    if (in_course) {
+                        link.text('Записаться');
+                        M.toast({html: 'Вы покинули курс!',
+                            classes: 'red',
+                            display_length: 1000})
+                    }
+                    else {
+                        link.text('Покинуть');
+                        M.toast({html: 'Вы записались на курс!',
+                            classes: 'green',
+                            display_length: 1000})
+                    }
+                }
+            });
+        }
+
+        function delete_course(course_id) {
+            var data = "course_id=" + course_id 
+                        + "&csrfmiddlewaretoken={{ csrf_token }}";
+            $.ajax({
+                url: '#',
+                method: 'POST',
+                data: data,
+                success: function(response) {
+                    $(`#course-${ course_id }`).remove();
+                    M.toast({html: 'Курс удалён!',
+                            classes: 'Red',
+                            display_length: 1000})
+                }
+            });
+        }
+
+        function checkbox_filters() {
+            var data = "filters=&csrfmiddlewaretoken={{ csrf_token }}&completed_courses=" 
+                        + ($("#completed_courses").is(":checked") ? '1' : '') 
+                        + "&enrolled_courses=" 
+                        + ($("#enrolled_courses").is(":checked") ? '1' : '')
+                        + "&my_courses=" 
+                        + ($("#my_courses").is(":checked") ? '1' : '')
+                        + "&search=" + $("#search").val();
+            $.ajax({
+                url: '#',
+                method: 'POST',
+                data: data,
+                success: function(response) {
+                    $('#courses-panel').empty().append(response);
+                }
+            });
+        }
+    </script>
+
+    <style>
+        .admin-icons {
+            height: 0px;
+            z-index: 5; 
+            position: relative;
+            float: right;
+            right: 20px;
+            top: 32px;
+        }
+        .model-choice {
+            z-index: 6;
+            width: 30%;
+        }
+        label > span {
+            color: black;
+        }
+        .card .card-action {
+            padding: 14px 24px !important;
+        }
+    </style>
 {% endblock %}

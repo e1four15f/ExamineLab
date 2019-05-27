@@ -18,7 +18,7 @@ RUN add-apt-repository -y ppa:deadsnakes/ppa
 RUN apt-get update
 RUN apt-get install -y python3.7
 RUN apt-get -y install python3-pip
-RUN pip3 install numpy
+#RUN pip3 install numpy
 RUN alias python3="python3.7"
 
 # JavaScript
@@ -26,4 +26,7 @@ RUN apt-get install -y npm
 RUN apt-get install -y nodejs
 
 #Java
-RUN apt-get install openjdk-7-jre
+#RUN add-apt-repository -y ppa:webupd8team/java
+#RUN apt-get update
+#RUN apt-get install oracle-java8-installer
+
