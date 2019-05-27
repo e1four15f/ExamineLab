@@ -1,7 +1,7 @@
-from django.contrib import admin
-from django.db import models
-from django.template.defaulttags import register
 from .models import *
+from django.db import models
+from django.contrib import admin
+from django.template.defaulttags import register
 
 
 admin.site.register(Course)

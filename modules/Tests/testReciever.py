@@ -1,11 +1,11 @@
 import os
-import threading
 import re
-import subprocess
 import signal
+import threading
+import subprocess
 
-from modules.Tests import testVerification as verification
 from threading import Thread, Event
+from modules.Tests import testVerification as verification
 
 
 def load_from(path2load, preproc = None, dir = True):

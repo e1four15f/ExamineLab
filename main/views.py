@@ -1,16 +1,16 @@
-from django.shortcuts import render, redirect, render_to_response
-from django.http import HttpResponse, HttpResponseNotFound, HttpResponseForbidden, HttpResponseBadRequest
-from django.contrib.auth.forms import AuthenticationForm
-from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
 from django.forms.models import model_to_dict
-from .forms import NewUserForm, AddCourseForm, AddTaskForm, EditorSubmitForm, UploadCodeForm, SelectLanguageForm, CustomAuthForm, AddTestForm
+from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth import login, logout, authenticate
+from django.shortcuts import render, redirect, render_to_response
 from .models import Course, Task, Test, Language, User, Statistics
+from django.http import HttpResponse, HttpResponseNotFound, HttpResponseForbidden, HttpResponseBadRequest
+from .forms import NewUserForm, AddCourseForm, AddTaskForm, EditorSubmitForm, UploadCodeForm, SelectLanguageForm, CustomAuthForm, AddTestForm
 
-from modules.Tests import testReciever 
-from modules.Containers.client import send_request
-from datetime import datetime, timedelta
 import os
+from modules.Tests import testReciever 
+from datetime import datetime, timedelta
+from modules.Containers.client import send_request
 
 
 def profile(request):
