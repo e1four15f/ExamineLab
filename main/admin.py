@@ -1,5 +1,6 @@
-from django.contrib import admin
+from .models import *
 from django.db import models
+from django.contrib import admin
 from django.template.defaulttags import register
 from .models import *
 

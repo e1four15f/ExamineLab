@@ -1,8 +1,9 @@
-import socket
+import os
 import sys
 import pickle
-import argparse
+import socket
 import logging
+import argparse
 
 sys.path.append('../')
 from modules.Tests import testReciever
@@ -17,6 +18,11 @@ def start_listening(ip, port, buffer_size=8192):
 
         while True:
             client, _ = s.accept()
+            server_pid = os.fork()
+            
+            if server_pid != 0:
+                continue
+
             while True:
                 data = client.recv(buffer_size)
                 if not data: 
@@ -27,7 +33,7 @@ def start_listening(ip, port, buffer_size=8192):
                 data = pickle.loads(data)
                 logging.info(f'Recived data: {data}, {type(data)}, {sys.getsizeof(data)} bytes')
                 passed, outs = testReciever.perform_testing_from_text(data['user_code'], data['tests'], data['language'], 
-                                        test_preproc = lambda t: t.replace('\n',''), user_preproc = lambda t: t.replace('\n',''))
+                                        test_preproc = lambda t: t.replace('\n',''), user_preproc = lambda t: t.replace('\n',''), timeout = 5)
                 response = passed, outs
                 response = pickle.dumps(response)
                 client.send(response)

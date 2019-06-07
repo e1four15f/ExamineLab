@@ -26,4 +26,7 @@ RUN apt-get install -y npm
 RUN apt-get install -y nodejs
 
 #Java
-RUN apt-get install openjdk-7-jre
+RUN add-apt-repository -y ppa:webupd8team/java
+RUN apt-get update
+RUN apt-get install oracle-java8-installer
+
